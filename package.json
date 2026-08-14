@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-desktop-community",
   "productName": "DeepSeek Harness Desktop",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
   "author": "DeepSeek Harness Desktop contributors",
   "type": "module",
@@ -20,15 +20,16 @@
     "start": "electron .",
     "dev": "electron . --devtools",
     "test": "node --test && npm run test:syntax && npm run test:skills",
-    "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs && node --check scripts/validate-skills.mjs",
+    "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs && node --check scripts/macos-sign.mjs && node --check scripts/run-electron-builder.mjs && node --check scripts/validate-skills.mjs && node --check scripts/verify-macos-signature.mjs",
     "test:skills": "node scripts/validate-skills.mjs",
     "smoke": "electron . --smoke-test",
-    "pack": "npm run prepare:runtime && electron-builder --dir",
-    "pack:mac": "npm run prepare:runtime && electron-builder --mac dir",
+    "pack": "npm run prepare:runtime && node scripts/run-electron-builder.mjs --dir",
+    "pack:mac": "npm run prepare:runtime && node scripts/run-electron-builder.mjs --mac dir",
     "dist:mac": "npm run dist:mac:x64 && npm run dist:mac:arm64",
-    "dist:mac:x64": "npm run prepare:runtime:mac:x64 && electron-builder --mac dmg zip --x64 --publish never",
-    "dist:mac:arm64": "npm run prepare:runtime:mac:arm64 && electron-builder --mac dmg zip --arm64 --publish never",
-    "dist:win": "npm run prepare:runtime:win:x64 && electron-builder --win nsis zip --x64 --publish never"
+    "dist:mac:x64": "npm run prepare:runtime:mac:x64 && node scripts/run-electron-builder.mjs --mac dmg zip --x64 --publish never",
+    "dist:mac:arm64": "npm run prepare:runtime:mac:arm64 && node scripts/run-electron-builder.mjs --mac dmg zip --arm64 --publish never",
+    "dist:win": "npm run prepare:runtime:win:x64 && node scripts/run-electron-builder.mjs --win nsis zip --x64 --publish never",
+    "verify:mac:signature": "node scripts/verify-macos-signature.mjs"
   },
   "devDependencies": {
     "electron": "43.4.0",
@@ -73,6 +74,7 @@
     "mac": {
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.icns",
+      "sign": "scripts/macos-sign.mjs",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "target": [

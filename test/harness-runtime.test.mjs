@@ -7,6 +7,7 @@ import {
   parseDshWebUrl,
 } from '../src/harness-runtime.mjs'
 import { resourcesDirectory } from '../scripts/after-pack.mjs'
+import { builderArguments } from '../scripts/run-electron-builder.mjs'
 
 test('parses the loopback URL printed by dsh', () => {
   assert.equal(parseDshWebUrl('dsh web: http://127.0.0.1:63905'), 'http://127.0.0.1:63905/')
@@ -64,5 +65,34 @@ test('locates packaged resources on macOS and Windows', () => {
   assert.equal(
     resourcesDirectory({ electronPlatformName: 'win32', appOutDir: '/out', packager: { appInfo } }),
     '/out/resources',
+  )
+})
+
+test('adds complete ad-hoc signing to certificate-free macOS builds', () => {
+  assert.deepEqual(
+    builderArguments({ platform: 'darwin', env: {}, args: ['--mac', 'dmg', '--arm64'] }),
+    ['--mac', 'dmg', '--arm64', '--config.mac.identity=-'],
+  )
+})
+
+test('does not override configured Developer ID or explicit signing identities', () => {
+  assert.deepEqual(
+    builderArguments({ platform: 'darwin', env: { CSC_LINK: 'certificate' }, args: ['--mac', 'dir'] }),
+    ['--mac', 'dir'],
+  )
+  assert.deepEqual(
+    builderArguments({
+      platform: 'darwin',
+      env: {},
+      args: ['--mac', 'dir', '--config.mac.identity=Developer ID Application: Example'],
+    }),
+    ['--mac', 'dir', '--config.mac.identity=Developer ID Application: Example'],
+  )
+})
+
+test('does not add a macOS identity to Windows builds', () => {
+  assert.deepEqual(
+    builderArguments({ platform: 'win32', env: {}, args: ['--win', 'nsis', '--x64'] }),
+    ['--win', 'nsis', '--x64'],
   )
 })

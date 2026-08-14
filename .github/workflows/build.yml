@@ -48,6 +48,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ${{ matrix.script }}
+        env:
+          CSC_LINK: ${{ runner.os == 'macOS' && secrets.MACOS_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ runner.os == 'macOS' && secrets.MACOS_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ runner.os == 'macOS' && secrets.MACOS_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.MACOS_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.MACOS_TEAM_ID || '' }}
+      - if: runner.os == 'macOS'
+        run: npm run verify:mac:signature
       - uses: actions/upload-artifact@v6
         with:
           name: deepseek-harness-desktop-${{ matrix.artifact }}
