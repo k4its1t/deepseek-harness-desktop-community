@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and community discussion
+    url: https://github.com/k4its1t/deepseek-harness-desktop-community/discussions
+    about: Ask for help, share a workflow, or discuss an idea before opening an issue.
+  - name: Private security report
+    url: https://github.com/k4its1t/deepseek-harness-desktop-community/security/advisories/new
+    about: Report suspected vulnerabilities privately instead of posting secrets in a public issue.
+  - name: Upstream DeepSeek Harness
+    url: https://github.com/deepseek-ai/deepseek-harness
+    about: Report behavior that also reproduces in the official CLI or Web UI without this desktop wrapper.

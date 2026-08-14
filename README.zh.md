@@ -1,5 +1,18 @@
 # DeepSeek Harness Desktop
 
+<p align="center">
+  <img src="build/icon.png" width="128" alt="DeepSeek Harness Desktop 大肥鱼图标">
+</p>
+
+<p align="center">把 DeepSeek Harness 装进一个可下载、可启动、可带走的 macOS / Windows 桌面窗口。</p>
+
+<p align="center">
+  <a href="https://github.com/k4its1t/deepseek-harness-desktop-community/actions/workflows/build.yml"><img src="https://github.com/k4its1t/deepseek-harness-desktop-community/actions/workflows/build.yml/badge.svg?branch=main" alt="构建状态"></a>
+  <a href="https://github.com/k4its1t/deepseek-harness-desktop-community/releases/latest"><img src="https://img.shields.io/github/v/release/k4its1t/deepseek-harness-desktop-community" alt="最新版本"></a>
+  <a href="https://github.com/k4its1t/deepseek-harness-desktop-community/releases"><img src="https://img.shields.io/github/downloads/k4its1t/deepseek-harness-desktop-community/total" alt="累计下载"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+</p>
+
 [English](README.md)
 
 这是一个面向 macOS 和 Windows 的非官方、简易、开源 DeepSeek Harness 桌面客户端，复用官方 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI 与 Agent 运行时。
@@ -7,6 +20,17 @@
 应用会把固定版本的 `@deepseek-ai/dsh` 作为私有子进程启动，绑定到随机回环端口，再通过沙箱化 Electron 窗口显示官方 Web UI。最终用户不需要另外安装 Node.js 或 `dsh`。
 
 > 本项目是独立社区项目，不是 DeepSeek 官方产品，也未得到 DeepSeek 的背书或隶属关系。
+
+## 为什么做这个
+
+DeepSeek Harness 本身已经提供完整的 Web UI 和 Agent 运行时，但命令行安装、Node.js 环境和后台进程会让一部分桌面用户望而却步。这个项目不重新实现 Harness，而是把锁定版本的官方运行时封装进 Electron：普通用户下载安装包即可启动，已有 CLI 用户还能继续复用原来的配置、会话和工作区。
+
+它比较适合：
+
+- 想在 macOS 或 Windows 上用独立窗口运行 DeepSeek Harness 的用户；
+- 不想单独维护 Node.js、`dsh` 命令和启动脚本的用户；
+- 已经使用 CLI，希望继续复用 `~/.dsh` 数据的用户；
+- 愿意测试社区构建并反馈不同硬件兼容性的开发者。
 
 ## 直接下载
 
@@ -19,6 +43,15 @@
 | 仅下载全部 3 个配套 Skill | [下载 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/latest/download/DeepSeek-Harness-Desktop-Skills.zip) |
 
 [查看最新版发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/latest)。上面的固定链接会始终指向最新版；历史发布页也会保留并引导到这里，不会再出现页面不存在。macOS 产物已有完整 ad-hoc 完整性签名，但尚未使用 Apple Developer ID 签名和公证，请在安装前核对发布说明。
+
+## 第一次使用
+
+1. 按处理器和系统下载对应安装包；不确定 Mac 类型时，可在“关于本机”中查看芯片。
+2. 启动应用并完成 Harness 标准引导。客户端**不附带公共 API Key**，每位用户需要配置自己的模型服务。
+3. 点击“添加工作区”，通过应用内目录浏览器选择本地项目。
+4. 新建会话并发送任务；现有 CLI 用户的配置和历史会自动从 `~/.dsh` 复用。
+
+遇到启动问题时，可从菜单打开日志目录，并使用内置 `/diagnose-harness-desktop` 做只读检查。提交公开 Issue 前请删除 API Key、用户名、私人路径和项目内容。
 
 ## 功能
 
@@ -70,12 +103,20 @@ Skill 默认不读取或输出 API 密钥，也不会在未经用户明确同意
 
 仓库不包含签名证书。无证书的 macOS 构建会获得完整 ad-hoc 完整性签名，但 Gatekeeper 仍无法识别发布者；首次运行可能需要在 Finder 中右键选择“打开”，或前往“系统设置 → 隐私与安全性 → 仍要打开”。Windows 可能显示 SmartScreen 提示。详情参见 [macOS 签名与首次启动说明](docs/MACOS_SIGNING.md)。
 
+## 能力边界与已知限制
+
+- 这是社区桌面包装，不提供 DeepSeek 官方支持、免费 API 配额或托管服务。
+- 当前没有内置自动更新；请关注 [Releases](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/latest) 并从固定链接下载新版。
+- macOS 构建尚未获得 Apple Developer ID 公证；Windows 构建也未使用商业代码签名。
+- Apple Silicon 已完成真实桌面回归；Intel Mac 和 Windows 仍欢迎实体设备测试报告。
+- 本地图片分析 Skill 需要用户自行安装 Ollama 视觉模型或 Tesseract，桌面客户端不会静默下载多 GB 模型。
+
 ## 开发运行
 
 要求 Node.js 22 或更高版本。
 
 ```bash
-git clone <你的仓库地址>
+git clone https://github.com/k4its1t/deepseek-harness-desktop-community.git
 cd deepseek-harness-desktop-community
 npm ci
 npm start
@@ -109,6 +150,15 @@ Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop.e
 ## 日志与数据
 
 通过 **File → Open Log Folder** 或 **File → Open DSH Data Folder** 打开目录。桌面壳只记录生命周期日志；常规数据仍由 DeepSeek Harness 保存在 `~/.dsh`。
+
+## 参与与反馈
+
+- 使用疑问、想法和使用展示：[GitHub Discussions](https://github.com/k4its1t/deepseek-harness-desktop-community/discussions)
+- 可复现故障：[提交 Bug](https://github.com/k4its1t/deepseek-harness-desktop-community/issues/new?template=bug_report.yml)
+- 新功能建议：[提交功能建议](https://github.com/k4its1t/deepseek-harness-desktop-community/issues/new?template=feature_request.yml)
+- Intel Mac / Windows 实机结果：[提交兼容性报告](https://github.com/k4its1t/deepseek-harness-desktop-community/issues/new?template=compatibility_report.yml)
+- 准备分享项目时，可直接使用 [社区分享素材包](docs/SHARING.md)
+- 代码贡献要求参见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
 
 ## Vibe Coding 与贡献者
 

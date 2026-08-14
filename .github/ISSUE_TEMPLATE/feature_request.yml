@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest a focused improvement to the desktop wrapper or companion skills
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the community desktop client. Please describe the user problem before proposing an implementation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What is difficult or impossible today, and who does it affect?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed experience
+      description: Describe the smallest useful behavior from the user's point of view.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Primary platform
+      options:
+        - All platforms
+        - macOS Apple Silicon
+        - macOS Intel
+        - Windows x64
+        - Companion Skills only
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional workarounds or related upstream Harness behavior.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: I understand this is an unofficial community wrapper and upstream Harness changes may belong in the upstream repository.
+          required: true
