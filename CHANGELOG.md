@@ -2,6 +2,27 @@
 
 这里记录 DeepSeek Harness Desktop 的最新发布内容。项目采用 **Vibe Coding** 方式开发，维护者负责目标、素材选择与发布决策，**Codex (OpenAI)** 作为开发贡献者参与实现、测试、打包和文档整理。
 
+## v0.3.1 — 2026-08-14
+
+### 🍎 macOS 安装体验与签名结构完善
+
+- 修复 macOS `.app` 只有 Electron 链接器残留签名、没有完整资源封装的问题；不再拿“半张签名”硬着头皮闯 Gatekeeper (╯°□°）╯︵ ┻━┻。
+- 无 Apple 证书时，由 electron-builder 对主程序、Helper、Framework、原生模块、Info.plist 和 32,000+ 个资源执行完整 ad-hoc 签名。
+- 打包副本会展开 npm `.bin` 符号链接，解决 Apple 严格 Bundle 校验中的 `invalid destination for symbolic link`。
+- 为大量 Harness 依赖加入低文件描述符占用的顺序扫描签名器，避免 macOS 构建出现 `EMFILE: too many open files`。
+- GitHub Actions 在上传产物前对 Apple Silicon 与 Intel `.app` 自动运行 `codesign --verify --deep --strict`，签名结构不合格就直接让构建失败。
+- 支持通过 GitHub Secrets 无改码切换到 Developer ID 正式签名与 Apple 公证；仓库和日志均不保存证书或密码。
+- 新增 macOS 首次启动、SHA-256 校验、临时绕过方式与正式签名配置文档。
+
+### ✅ 本机验证
+
+- 11 项 Node.js 自动测试、JavaScript 语法检查和 3 个 Skill 校验通过。
+- Apple Silicon `.app` 严格递归签名校验通过，Info.plist 已绑定，32,972 个资源已密封。
+- 打包后的应用成功启动内置 Harness Web UI，并输出 `DESKTOP_SMOKE_OK`。
+- 添加下载隔离属性后，代码签名完整性仍可验证；由于尚无 Developer ID 与公证，Gatekeeper 仍可能要求“仍要打开”。这次修的是包真的完整，不是假装有苹果证书，主打一个实诚 (￣▽￣)b。
+
+完整发布说明参见 [`docs/releases/v0.3.1.md`](docs/releases/v0.3.1.md)。
+
 ## v0.3.0 — 2026-08-14
 
 ### 🐋 大肥鱼 icon 正式上岗
@@ -47,5 +68,3 @@
 - 本项目是非官方社区项目，与 DeepSeek 没有隶属或背书关系。
 - 发布产物尚未进行商业代码签名；macOS 可能需要右键选择“打开”，Windows 可能显示 SmartScreen 提示。
 - GitHub Releases 只保留当前最新版本，避免旧安装包和过期说明继续分流用户。
-
-完整发布说明参见 [`docs/releases/v0.3.0.md`](docs/releases/v0.3.0.md)。

@@ -12,13 +12,13 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 
 | Platform | Download |
 | --- | --- |
-| macOS Apple Silicon (M1/M2/M3/M4) | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-macOS-arm64.dmg) |
-| macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-macOS-x64.dmg) |
-| Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-Windows-x64-Setup.exe) |
-| Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-Windows-x64-portable.zip) |
-| All 3 companion skills | [Download skills ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-Skills-0.3.0.zip) |
+| macOS Apple Silicon (M1/M2/M3/M4) | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-0.3.1-macOS-arm64.dmg) |
+| macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-0.3.1-macOS-x64.dmg) |
+| Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-0.3.1-Windows-x64-Setup.exe) |
+| Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-0.3.1-Windows-x64-portable.zip) |
+| All 3 companion skills | [Download skills ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-Skills-0.3.1.zip) |
 
-[View the full v0.3.0 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.3.0). The artifacts are unsigned; review the release notes before installing.
+[View the full v0.3.1 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.3.1). macOS artifacts have a complete ad-hoc integrity signature but are not Apple Developer ID signed or notarized; review the release notes before installing.
 
 ## Features
 
@@ -58,7 +58,7 @@ The skills do not read or expose API keys by default and will not send test requ
 
 `/analyze-images-locally` bridges a user-approved local image through an installed Ollama vision model, then lets the active text-only DeepSeek model reason over structured observations. It supports screenshots, photos, scanned documents, charts, and diagrams; a local Tesseract installation provides an OCR-only fallback.
 
-[Download the complete v0.3.0 companion Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-Skills-0.3.0.zip). Extract only its `analyze-images-locally` folder into `~/.dsh/skills`, restart Harness, and invoke it with a local image path. The Skill is not bundled into the desktop installer because the optional Ollama vision model requires a separate multi-gigabyte download. It never installs or downloads that dependency without approval and does not use a cloud vision fallback.
+[Download the complete v0.3.1 companion Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.1/DeepSeek-Harness-Desktop-Skills-0.3.1.zip). Extract only its `analyze-images-locally` folder into `~/.dsh/skills`, restart Harness, and invoke it with a local image path. The Skill is not bundled into the desktop installer because the optional Ollama vision model requires a separate multi-gigabyte download. It never installs or downloads that dependency without approval and does not use a cloud vision fallback.
 
 ## Release status
 
@@ -68,7 +68,7 @@ The skills do not read or expose API keys by default and will not send test requ
 | macOS Intel | DMG / ZIP | Built natively by GitHub Actions; final launch verification requires an Intel Mac |
 | Windows x64 | NSIS installer / portable ZIP | Built natively by Windows GitHub Actions; final interactive verification still requires a physical Windows desktop |
 
-The repository intentionally contains no signing certificates, so local and CI artifacts are unsigned by default. On first launch, macOS may require **Open** from Finder's context menu, and Windows may show a SmartScreen warning.
+The repository intentionally contains no signing certificates. Certificate-free macOS builds receive a complete ad-hoc integrity signature, but Gatekeeper still cannot identify the publisher; first launch may require Finder's **Open** command or **System Settings → Privacy & Security → Open Anyway**. Windows may show a SmartScreen warning. See [macOS signing and first-launch guidance](docs/MACOS_SIGNING.md).
 
 ## Install for development
 
@@ -102,7 +102,7 @@ npm run dist:mac
 npm run dist:win
 ```
 
-Unsigned artifacts are written to `release/`. The GitHub Actions workflow builds macOS x64, macOS arm64, and Windows x64 artifacts. Public releases should be signed and, on macOS, notarized. Signing credentials are deliberately not included in this repository.
+Artifacts are written to `release/`. The GitHub Actions workflow builds macOS x64, macOS arm64, and Windows x64 artifacts and strictly verifies both macOS app signatures. Without credentials, macOS uses a complete ad-hoc signature. Repository maintainers can add Developer ID and notarization secrets without changing the build commands; see [docs/MACOS_SIGNING.md](docs/MACOS_SIGNING.md). Credentials are deliberately never stored in the repository.
 
 The Windows portable ZIP can be extracted and run via `DeepSeek Harness Desktop.exe`. Build the NSIS `.exe` installer on Windows or with the included GitHub Actions workflow.
 

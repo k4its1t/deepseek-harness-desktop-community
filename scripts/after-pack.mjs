@@ -1,4 +1,4 @@
-import { cp, mkdir, stat } from 'node:fs/promises'
+import { cp, mkdir, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export function resourcesDirectory(context) {
@@ -23,10 +23,13 @@ export default async function afterPack(context) {
   await stat(join(source, '@deepseek-ai', 'dsh', 'lib', 'bin.js'))
 
   const target = join(resourcesDirectory(context), 'runtime', 'node_modules')
+  await rm(target, { recursive: true, force: true })
   await mkdir(target, { recursive: true })
   await cp(source, target, {
     recursive: true,
-    dereference: false,
+    // Apple rejects npm's relative .bin symlinks during strict bundle
+    // verification. Expand links only in the packaged copy.
+    dereference: true,
     preserveTimestamps: true,
   })
 }
