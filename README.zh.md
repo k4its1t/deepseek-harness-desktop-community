@@ -68,6 +68,12 @@ Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop C
 
 通过 **File → Open Log Folder** 或 **File → Open DSH Data Folder** 打开目录。桌面壳只记录生命周期日志；常规数据仍由 DeepSeek Harness 保存在 `~/.dsh`。
 
+## Vibe Coding 与贡献者
+
+本项目采用 **Vibe Coding** 方式开发：由项目维护者提出目标、提供运行环境并确认发布方向，`Codex (OpenAI)` 协助完成实现、测试、跨平台打包、问题排查和文档整理。
+
+完整贡献说明参见 [CONTRIBUTORS.md](CONTRIBUTORS.md)。使用 AI 辅助开发不改变本项目作为非官方社区包装的性质，发布者仍应负责审查代码、验证产物并评估使用风险。
+
 ## 安全设计
 
 Web UI 只监听随机回环端口。Electron Renderer 使用 `contextIsolation`、Chromium sandbox，未启用 Node integration，也没有高权限 preload bridge。更多信息参见 [SECURITY.md](SECURITY.md)。

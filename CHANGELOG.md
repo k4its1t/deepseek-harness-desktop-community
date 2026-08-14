@@ -10,3 +10,4 @@ All notable changes to this project are documented in this file.
 - Added macOS arm64/x64 and Windows x64 packaging scripts.
 - Added GitHub Actions builds, automated tests, security policy, contribution guide, third-party notices, and bilingual documentation.
 - Fixed CI packaging by using a native Intel macOS runner and disabling electron-builder's implicit CI publishing mode.
+- Documented the project's Vibe Coding workflow and Codex contribution.

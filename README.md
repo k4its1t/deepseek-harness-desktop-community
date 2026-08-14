@@ -68,6 +68,12 @@ The Windows portable ZIP can be extracted and run via `DeepSeek Harness Desktop 
 
 Use **File → Open Log Folder** or **File → Open DSH Data Folder**. The wrapper writes lifecycle logs only; DeepSeek Harness owns its normal data under `~/.dsh`.
 
+## Vibe Coding and contributors
+
+This project was developed using a **Vibe Coding** workflow: the project maintainer defined the goals, supplied the runtime environment, and approved the release direction, while `Codex (OpenAI)` assisted with implementation, testing, cross-platform packaging, debugging, and documentation.
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the contributor statement. AI-assisted development does not change this project's status as an unofficial community wrapper; publishers remain responsible for reviewing the code, validating artifacts, and assessing usage risks.
+
 ## Security
 
 The Web UI is reachable only on a random loopback port. Electron's renderer uses `contextIsolation`, Chromium sandboxing, and no Node.js integration or preload bridge. See [SECURITY.md](SECURITY.md).

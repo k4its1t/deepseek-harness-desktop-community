@@ -1,6 +1,7 @@
 node_modules/
 runtime/node_modules/
 release/
+release-assets/
 dist/
 *.log
 .DS_Store

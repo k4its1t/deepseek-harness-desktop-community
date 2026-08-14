@@ -46,6 +46,7 @@
       "build/icon.svg",
       "LICENSE",
       "THIRD_PARTY_NOTICES.md",
+      "CONTRIBUTORS.md",
       "package.json"
     ],
     "asar": true,
