@@ -22,7 +22,13 @@ export default async function afterPack(context) {
   const source = join(context.packager.projectDir, 'runtime', 'node_modules')
   await stat(join(source, '@deepseek-ai', 'dsh', 'lib', 'bin.js'))
 
-  const target = join(resourcesDirectory(context), 'runtime', 'node_modules')
+  const resources = resourcesDirectory(context)
+  // The desktop Web profile cannot start without this physical overlay. Check
+  // both macOS and Windows packages during afterPack instead of discovering a
+  // missing extraResource only on an end user's machine.
+  await stat(join(resources, 'desktop', 'cordis.patch.yml'))
+
+  const target = join(resources, 'runtime', 'node_modules')
   await rm(target, { recursive: true, force: true })
   await mkdir(target, { recursive: true })
   await cp(source, target, {

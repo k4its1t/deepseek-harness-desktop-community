@@ -3,7 +3,9 @@ import { test } from 'node:test'
 import {
   bundledDshBin,
   bundledSkillsDirectory,
+  bundledWebPatch,
   createLineReader,
+  harnessWebArguments,
   parseDshWebUrl,
 } from '../src/harness-runtime.mjs'
 import { resourcesDirectory } from '../scripts/after-pack.mjs'
@@ -53,6 +55,35 @@ test('resolves development and packaged companion skills', () => {
   assert.equal(
     bundledSkillsDirectory({ appPath: '/unused/app.asar', resourcesPath: '/resources', isPackaged: true }),
     '/resources/skills',
+  )
+})
+
+test('resolves the physical desktop Web overlay on macOS and Windows layouts', () => {
+  assert.equal(
+    bundledWebPatch({ appPath: '/repo', resourcesPath: '/unused', isPackaged: false }),
+    '/repo/desktop/cordis.patch.yml',
+  )
+  assert.equal(
+    bundledWebPatch({ appPath: '/unused/app.asar', resourcesPath: '/resources', isPackaged: true }),
+    '/resources/desktop/cordis.patch.yml',
+  )
+})
+
+test('pins the cross-platform browse picker before starting the Web app', () => {
+  assert.deepEqual(
+    harnessWebArguments({ dshBin: '/runtime/dsh/bin.js', webPatch: '/resources/desktop/cordis.patch.yml' }),
+    [
+      '--expose-internals',
+      '/runtime/dsh/bin.js',
+      '--profile',
+      'web',
+      '--patch',
+      '/resources/desktop/cordis.patch.yml',
+      '--host',
+      '127.0.0.1',
+      '--port',
+      '0',
+    ],
   )
 })
 

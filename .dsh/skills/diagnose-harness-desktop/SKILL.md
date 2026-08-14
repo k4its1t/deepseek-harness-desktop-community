@@ -15,6 +15,18 @@ Diagnose the smallest failing layer and return evidence-backed next steps. Keep 
 - Do not delete sessions, reset `~/.dsh`, replace profiles, reinstall the app, or change provider configuration during diagnosis.
 - Explain before making an API request because it may create a session and incur cost. Use one minimal request only after the user agrees.
 
+## Hard budget and stop rules
+
+These rules are mandatory even when more evidence might be interesting:
+
+- Use at most **8 diagnostic tool calls** in one diagnosis. A grouped metadata command counts as one call.
+- Attempt each optional evidence target once. If a command, parser, archive read, or path lookup fails, record it under **Unverified** and do not retry it with adjusted flags, offsets, scripts, or another tool.
+- Never manually parse, unpack, extract, reverse engineer, or byte-scan `app.asar`, executables, installers, or other archives during the default workflow.
+- If source inspection is genuinely required, use an already available repository checkout. Otherwise state that packaged source inspection was not performed.
+- As soon as the failing layer, minimal reproduction, and one supporting observation are known, stop collecting evidence and write the report.
+- Do not spend additional calls confirming a healthy layer after a lower layer has already been isolated.
+- If the tool-call budget would be exceeded, stop immediately and report the evidence already collected.
+
 ## Workflow
 
 ### 1. Establish the symptom
@@ -71,5 +83,7 @@ Return:
 - **Likely cause:** label inference explicitly;
 - **Next action:** the smallest reversible fix or next check;
 - **Unverified:** anything that requires another OS, credentials, paid requests, or user interaction.
+
+Do not delay the report to inspect implementation details after the failing layer is isolated.
 
 If the issue should be reported upstream, recommend loading `prepare-harness-bug-report` after the evidence is collected.

@@ -6,6 +6,7 @@ import {
   HarnessRuntime,
   bundledDshBin,
   bundledSkillsDirectory,
+  bundledWebPatch,
 } from './harness-runtime.mjs'
 
 const APP_NAME = 'DeepSeek Harness Desktop'
@@ -170,6 +171,11 @@ async function boot() {
     }),
     dshHome,
     bundledSkills: bundledSkillsDirectory({
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      isPackaged: app.isPackaged,
+    }),
+    webPatch: bundledWebPatch({
       appPath: app.getAppPath(),
       resourcesPath: process.resourcesPath,
       isPackaged: app.isPackaged,

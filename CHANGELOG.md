@@ -2,6 +2,33 @@
 
 这里记录 DeepSeek Harness Desktop 的最新发布内容。项目采用 **Vibe Coding** 方式开发，维护者负责目标、素材选择与发布决策，**Codex (OpenAI)** 作为开发贡献者参与实现、测试、打包和文档整理。
 
+## v0.3.2 — 2026-08-14
+
+### 📁 工作区选择器恢复营业
+
+- 修复 macOS 上“添加工作区”和“选择工作区”点击后毫无反应、目录窗口不出现、输入框一直灰掉的问题，终于不再对着按钮表演空气点击 (；￣Д￣)。
+- 桌面发行版固定使用 Harness 官方的应用内目录浏览器，可通过面包屑或直接输入路径定位项目。
+- macOS 与 Windows 统一走同一套 browse picker，不再分别依赖 AppleScript 与 Windows COM 原生窗口，减少平台差异和静默失败。
+- 桌面专用 Cordis overlay 作为物理资源随安装包分发，并通过 `--profile web --patch` 在用户配置之后加载；不修改用户现有 `~/.dsh`。
+- 增加开发版与打包版 overlay 路径、启动参数顺序及 macOS/Windows 资源布局测试。
+- 下载附件改用不带版本号的固定名称，README 统一使用 `releases/latest`；历史发布页保留并引导访问最新版，旧书签不再撞上 404。
+
+### 🧯 诊断 Skill 防止越查越上头
+
+- 为 `/diagnose-harness-desktop` 增加最多 8 次诊断工具调用的硬预算。
+- 同一可选证据失败后不得换参数、偏移量或脚本重复尝试；失败内容转入 `Unverified` 后立即继续报告。
+- 默认禁止手工解析、解包或字节扫描 `app.asar`、安装包与可执行文件。
+- 一旦定位失败层、最小复现和支持证据，必须停止取证并输出结论，避免 token 像水龙头一样哗哗流 (╥﹏╥)。
+
+### ✅ 本机验证
+
+- 13 项 Node.js 自动测试、JavaScript 语法检查和 3 个 Skill 校验通过。
+- 在全新临时 DSH 配置中完成“首次启动 → 稍后配置 API → 添加工作区 → 输入绝对路径 → 打开项目 → 新会话输入框启用”真实桌面回归。
+- 临时 workspace registry 正确保存所选项目，未读写用户正式 API 凭据。
+- Windows 使用相同的应用内选择器与物理 overlay 路径；Windows 安装包仍需由 GitHub Actions/Windows 真机完成最终构建与交互验证。
+
+完整发布说明参见 [`docs/releases/v0.3.2.md`](docs/releases/v0.3.2.md)。
+
 ## v0.3.1 — 2026-08-14
 
 ### 🍎 macOS 安装体验与签名结构完善
