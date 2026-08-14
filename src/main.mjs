@@ -8,11 +8,12 @@ import {
   bundledSkillsDirectory,
 } from './harness-runtime.mjs'
 
-const APP_NAME = 'DeepSeek Harness Desktop Community'
+const APP_NAME = 'DeepSeek Harness Desktop'
 const isSmokeTest = process.argv.includes('--smoke-test')
 const openDevTools = process.argv.includes('--devtools')
 const loadingPage = join(import.meta.dirname, 'loading.html')
 const loadingPageUrl = pathToFileURL(loadingPage)
+const windowIcon = join(import.meta.dirname, '../build/icon.png')
 
 let mainWindow
 let runtime
@@ -68,6 +69,7 @@ function createWindow() {
     show: false,
     backgroundColor: '#0f1020',
     title: APP_NAME,
+    icon: windowIcon,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

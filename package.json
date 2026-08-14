@@ -1,9 +1,9 @@
 {
   "name": "deepseek-harness-desktop-community",
-  "productName": "DeepSeek Harness Desktop Community",
-  "version": "0.2.0",
+  "productName": "DeepSeek Harness Desktop",
+  "version": "0.3.0",
   "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
-  "author": "DeepSeek Harness Desktop Community contributors",
+  "author": "DeepSeek Harness Desktop contributors",
   "type": "module",
   "main": "src/main.mjs",
   "license": "MIT",
@@ -44,7 +44,8 @@
     "files": [
       "src/**/*",
       "build/icon.png",
-      "build/icon.svg",
+      "build/icon.icns",
+      "build/icon.ico",
       "LICENSE",
       "THIRD_PARTY_NOTICES.md",
       "CONTRIBUTORS.md",
@@ -71,7 +72,7 @@
     ],
     "mac": {
       "category": "public.app-category.developer-tools",
-      "icon": "build/icon.png",
+      "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "target": [
@@ -83,7 +84,7 @@
       "sign": false
     },
     "win": {
-      "icon": "build/icon.png",
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "zip"
