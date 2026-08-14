@@ -8,6 +8,17 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 
 > This community project is not an official DeepSeek product and is not affiliated with or endorsed by DeepSeek.
 
+## Direct downloads
+
+| Platform | Download |
+| --- | --- |
+| macOS Apple Silicon (M1/M2/M3/M4) | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-arm64.dmg) |
+| macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-x64.dmg) |
+| Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-Setup.exe) |
+| Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-portable.zip) |
+
+[View the full v0.1.0 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.1.0). The artifacts are unsigned; review the release notes before installing.
+
 ## Features
 
 - Official DeepSeek Harness Web UI and agent runtime

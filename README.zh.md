@@ -8,6 +8,17 @@
 
 > 本项目是独立社区项目，不是 DeepSeek 官方产品，也未得到 DeepSeek 的背书或隶属关系。
 
+## 直接下载
+
+| 平台 | 下载 |
+| --- | --- |
+| macOS Apple Silicon（M1/M2/M3/M4） | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-arm64.dmg) |
+| macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-x64.dmg) |
+| Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-Setup.exe) |
+| Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-portable.zip) |
+
+[查看完整 v0.1.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.1.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
+
 ## 功能
 
 - 官方 DeepSeek Harness Web UI 与 Agent 运行时
