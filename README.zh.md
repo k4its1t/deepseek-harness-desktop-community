@@ -1,4 +1,4 @@
-# DeepSeek Harness Desktop Community
+# DeepSeek Harness Desktop
 
 [English](README.md)
 
@@ -12,13 +12,13 @@
 
 | 平台 | 下载 |
 | --- | --- |
-| macOS Apple Silicon（M1/M2/M3/M4） | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-arm64.dmg) |
-| macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-x64.dmg) |
-| Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-Setup.exe) |
-| Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-portable.zip) |
-| 仅下载配套 Skill | [下载 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Companion-Skills-0.2.0.zip) |
+| macOS Apple Silicon（M1/M2/M3/M4） | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-macOS-arm64.dmg) |
+| macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-macOS-x64.dmg) |
+| Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-Windows-x64-Setup.exe) |
+| Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-0.3.0-Windows-x64-portable.zip) |
+| 仅下载全部 3 个配套 Skill | [下载 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-Skills-0.3.0.zip) |
 
-[查看完整 v0.2.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.2.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
+[查看完整 v0.3.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.3.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
 
 ## 功能
 
@@ -58,7 +58,7 @@ Skill 默认不读取或输出 API 密钥，也不会在未经用户明确同意
 
 `/analyze-images-locally` 会把用户指定的本地图片交给已安装的 Ollama 视觉模型生成结构化观察，再由当前纯文本 DeepSeek 模型继续推理。它适用于截图、照片、扫描文档、图表和流程图；若本机只安装了 Tesseract，则可降级为纯 OCR。
 
-[下载独立 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/image-analysis-skill-v0.1.0/DeepSeek-Harness-Analyze-Images-Locally-Skill-0.1.0.zip)。把压缩包内的 `analyze-images-locally` 文件夹解压到 `~/.dsh/skills`，重启 Harness，然后在调用时提供本地图片路径。该 Skill 不随桌面安装包分发，因为可选 Ollama 视觉模型需要另行下载数 GB 数据；未经同意不会安装或下载依赖，也不会使用云端视觉服务兜底。
+[下载 v0.3.0 全部配套 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.3.0/DeepSeek-Harness-Desktop-Skills-0.3.0.zip)。只需把压缩包内的 `analyze-images-locally` 文件夹解压到 `~/.dsh/skills`，重启 Harness，然后在调用时提供本地图片路径。该 Skill 不随桌面安装包分发，因为可选 Ollama 视觉模型需要另行下载数 GB 数据；未经同意不会安装或下载依赖，也不会使用云端视觉服务兜底。
 
 ## 当前发布状态
 
@@ -104,7 +104,7 @@ npm run dist:win
 
 未签名产物会写入 `release/`。GitHub Actions 会生成 macOS x64、macOS arm64 和 Windows x64 产物。正式公开发布前应配置代码签名，并对 macOS 应用进行公证；仓库不会包含签名凭据。
 
-Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop Community.exe`；NSIS `.exe` 安装程序应在 Windows 或仓库自带的 GitHub Actions 中生成。
+Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop.exe`；NSIS `.exe` 安装程序应在 Windows 或仓库自带的 GitHub Actions 中生成。
 
 ## 日志与数据
 
