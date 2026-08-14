@@ -54,6 +54,12 @@ Copy-Item -Recurse -Force .dsh\skills\* "$HOME\.dsh\skills\"
 
 Skill 默认不读取或输出 API 密钥，也不会在未经用户明确同意时发送测试请求、修改配置或提交 GitHub Issue。`npm test` 会使用项目锁定的 DeepSeek Harness 解析器检查 Skill 的发现结果和元数据。
 
+### 独立本地图片分析 Skill
+
+`/analyze-images-locally` 会把用户指定的本地图片交给已安装的 Ollama 视觉模型生成结构化观察，再由当前纯文本 DeepSeek 模型继续推理。它适用于截图、照片、扫描文档、图表和流程图；若本机只安装了 Tesseract，则可降级为纯 OCR。
+
+[下载独立 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/image-analysis-skill-v0.1.0/DeepSeek-Harness-Analyze-Images-Locally-Skill-0.1.0.zip)。把压缩包内的 `analyze-images-locally` 文件夹解压到 `~/.dsh/skills`，重启 Harness，然后在调用时提供本地图片路径。该 Skill 不随桌面安装包分发，因为可选 Ollama 视觉模型需要另行下载数 GB 数据；未经同意不会安装或下载依赖，也不会使用云端视觉服务兜底。
+
 ## 当前发布状态
 
 | 平台 | 产物 | 验证状态 |

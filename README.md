@@ -54,6 +54,12 @@ Copy-Item -Recurse -Force .dsh\skills\* "$HOME\.dsh\skills\"
 
 The skills do not read or expose API keys by default and will not send test requests, change configuration, or submit GitHub issues without explicit user approval. `npm test` validates their discovery and metadata with the pinned DeepSeek Harness parser.
 
+### Standalone local image-analysis skill
+
+`/analyze-images-locally` bridges a user-approved local image through an installed Ollama vision model, then lets the active text-only DeepSeek model reason over structured observations. It supports screenshots, photos, scanned documents, charts, and diagrams; a local Tesseract installation provides an OCR-only fallback.
+
+[Download the standalone Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/image-analysis-skill-v0.1.0/DeepSeek-Harness-Analyze-Images-Locally-Skill-0.1.0.zip). Extract its `analyze-images-locally` folder into `~/.dsh/skills`, restart Harness, and invoke it with a local image path. The Skill is not bundled into the desktop installer because the optional Ollama vision model requires a separate multi-gigabyte download. It never installs or downloads that dependency without approval and does not use a cloud vision fallback.
+
 ## Release status
 
 | Platform | Artifact | Verification status |

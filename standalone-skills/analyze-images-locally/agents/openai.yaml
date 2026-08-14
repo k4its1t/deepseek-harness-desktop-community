@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analyze Images Locally"
+  short_description: "Bridge local vision observations into DeepSeek reasoning"
+  default_prompt: "Use $analyze-images-locally to inspect a local image safely and answer my question."

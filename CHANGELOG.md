@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## Unreleased
+
+- Added a separately downloadable local image-analysis bridge Skill for text-only DeepSeek models.
+
 ## 0.2.0 - 2026-08-14
 
 - Added bundled companion skills for safe desktop diagnosis and sanitized bug-report preparation.
