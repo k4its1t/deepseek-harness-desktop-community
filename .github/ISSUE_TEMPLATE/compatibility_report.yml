@@ -1,0 +1,58 @@
+name: Compatibility report
+description: Share a successful or failed launch on physical macOS or Windows hardware
+title: "[Compatibility]: "
+labels: [testing]
+body:
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works as expected
+        - Works with a warning or workaround
+        - Cannot launch or complete onboarding
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Platform
+      options:
+        - macOS Apple Silicon
+        - macOS Intel
+        - Windows x64 installer
+        - Windows x64 portable ZIP
+    validations:
+      required: true
+  - type: input
+    id: os_version
+    attributes:
+      label: Operating-system version
+      placeholder: macOS 15.6 or Windows 11 24H2
+    validations:
+      required: true
+  - type: input
+    id: app_version
+    attributes:
+      label: App version
+      placeholder: 0.3.2
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Behaviors tested
+      options:
+        - label: Application launch
+        - label: Provider/API configuration
+        - label: Add Workspace flow
+        - label: Session creation and response streaming
+        - label: File or Bash/PowerShell tool invocation
+        - label: Application quit and runtime cleanup
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes and workarounds
+      description: Do not include API keys, usernames, private paths, session content, or confidential project data.
+    validations:
+      required: true
