@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Harness Bug Report"
+  short_description: "Create a sanitized, reproducible Harness issue report"
+  default_prompt: "Use $prepare-harness-bug-report to turn my Harness Desktop problem into a sanitized GitHub issue."

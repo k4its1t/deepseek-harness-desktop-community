@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.2.0 - 2026-08-14
+
+- Added bundled companion skills for safe desktop diagnosis and sanitized bug-report preparation.
+- Added automated skill discovery, metadata, and resource validation using the pinned DeepSeek Harness parser.
+
 ## 0.1.0 - 2026-08-14
 
 - Added a minimal Electron shell for the official DeepSeek Harness Web UI.

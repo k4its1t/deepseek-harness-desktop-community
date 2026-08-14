@@ -2,7 +2,11 @@ import { appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { app, BrowserWindow, dialog, Menu, session, shell } from 'electron'
-import { HarnessRuntime, bundledDshBin } from './harness-runtime.mjs'
+import {
+  HarnessRuntime,
+  bundledDshBin,
+  bundledSkillsDirectory,
+} from './harness-runtime.mjs'
 
 const APP_NAME = 'DeepSeek Harness Desktop Community'
 const isSmokeTest = process.argv.includes('--smoke-test')
@@ -163,6 +167,11 @@ async function boot() {
       isPackaged: app.isPackaged,
     }),
     dshHome,
+    bundledSkills: bundledSkillsDirectory({
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      isPackaged: app.isPackaged,
+    }),
     workingDirectory: app.getPath('home'),
     log,
   })

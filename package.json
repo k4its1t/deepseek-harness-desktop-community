@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-desktop-community",
   "productName": "DeepSeek Harness Desktop Community",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
   "author": "DeepSeek Harness Desktop Community contributors",
   "type": "module",
@@ -19,8 +19,9 @@
     "prepare:runtime:win:x64": "npm ci --omit=dev --prefix runtime --os=win32 --cpu=x64 && node scripts/fix-runtime-permissions.mjs win32-x64",
     "start": "electron .",
     "dev": "electron . --devtools",
-    "test": "node --test && npm run test:syntax",
-    "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs",
+    "test": "node --test && npm run test:syntax && npm run test:skills",
+    "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs && node --check scripts/validate-skills.mjs",
+    "test:skills": "node scripts/validate-skills.mjs",
     "smoke": "electron . --smoke-test",
     "pack": "npm run prepare:runtime && electron-builder --dir",
     "pack:mac": "npm run prepare:runtime && electron-builder --mac dir",
@@ -56,6 +57,13 @@
       {
         "from": "runtime",
         "to": "runtime",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".dsh/skills",
+        "to": "skills",
         "filter": [
           "**/*"
         ]

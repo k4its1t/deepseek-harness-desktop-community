@@ -12,12 +12,12 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 
 | Platform | Download |
 | --- | --- |
-| macOS Apple Silicon (M1/M2/M3/M4) | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-arm64.dmg) |
-| macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-x64.dmg) |
-| Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-Setup.exe) |
-| Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-portable.zip) |
+| macOS Apple Silicon (M1/M2/M3/M4) | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-arm64.dmg) |
+| macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-x64.dmg) |
+| Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-Setup.exe) |
+| Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-portable.zip) |
 
-[View the full v0.1.0 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.1.0). The artifacts are unsigned; review the release notes before installing.
+[View the full v0.2.0 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.2.0). The artifacts are unsigned; review the release notes before installing.
 
 ## Features
 
@@ -28,6 +28,30 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 - Sandboxed renderer with Node integration disabled
 - Native directory picker and platform-specific Harness tools
 - Automatic child-process shutdown when the desktop app quits
+- Bundled diagnosis and privacy-safe bug-report skills
+
+## Companion skills
+
+The desktop app bundles two optional skills from `.dsh/skills` and makes them available automatically:
+
+- `/diagnose-harness-desktop` safely performs read-only diagnosis of desktop startup, API, session, profile, tool, permission, and packaging problems.
+- `/prepare-harness-bug-report` turns diagnostic evidence into a sanitized, reproducible GitHub issue draft.
+
+DeepSeek Harness also discovers the source copies automatically when this repository is the current workspace. To use them with other Harness installations, copy them to the default user skill directory:
+
+```bash
+# macOS
+mkdir -p "$HOME/.dsh/skills"
+cp -R .dsh/skills/* "$HOME/.dsh/skills/"
+```
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force "$HOME\.dsh\skills"
+Copy-Item -Recurse -Force .dsh\skills\* "$HOME\.dsh\skills\"
+```
+
+The skills do not read or expose API keys by default and will not send test requests, change configuration, or submit GitHub issues without explicit user approval. `npm test` validates their discovery and metadata with the pinned DeepSeek Harness parser.
 
 ## Release status
 
@@ -35,7 +59,7 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 | --- | --- | --- |
 | macOS Apple Silicon | DMG / ZIP | Launch, existing API configuration, sessions, and Bash tool invocation verified in the real desktop window |
 | macOS Intel | DMG / ZIP | Built natively by GitHub Actions; final launch verification requires an Intel Mac |
-| Windows x64 | NSIS installer / portable ZIP | Cross-built on macOS and inspected for Windows-native dependencies; final launch verification requires Windows or GitHub Actions |
+| Windows x64 | NSIS installer / portable ZIP | Built natively by Windows GitHub Actions; final interactive verification still requires a physical Windows desktop |
 
 The repository intentionally contains no signing certificates, so local and CI artifacts are unsigned by default. On first launch, macOS may require **Open** from Finder's context menu, and Windows may show a SmartScreen warning.
 

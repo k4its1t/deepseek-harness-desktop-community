@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   bundledDshBin,
+  bundledSkillsDirectory,
   createLineReader,
   parseDshWebUrl,
 } from '../src/harness-runtime.mjs'
@@ -40,6 +41,17 @@ test('resolves the physical packaged runtime', () => {
   assert.equal(
     bundledDshBin({ appPath: '/unused/app.asar', resourcesPath: '/Applications/DSH.app/Contents/Resources', isPackaged: true }),
     '/Applications/DSH.app/Contents/Resources/runtime/node_modules/@deepseek-ai/dsh/lib/bin.js',
+  )
+})
+
+test('resolves development and packaged companion skills', () => {
+  assert.equal(
+    bundledSkillsDirectory({ appPath: '/repo', resourcesPath: '/unused', isPackaged: false }),
+    '/repo/.dsh/skills',
+  )
+  assert.equal(
+    bundledSkillsDirectory({ appPath: '/unused/app.asar', resourcesPath: '/resources', isPackaged: true }),
+    '/resources/skills',
   )
 })
 

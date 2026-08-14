@@ -12,12 +12,12 @@
 
 | 平台 | 下载 |
 | --- | --- |
-| macOS Apple Silicon（M1/M2/M3/M4） | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-arm64.dmg) |
-| macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-macOS-x64.dmg) |
-| Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-Setup.exe) |
-| Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.1.0/DeepSeek-Harness-Desktop-Community-0.1.0-Windows-x64-portable.zip) |
+| macOS Apple Silicon（M1/M2/M3/M4） | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-arm64.dmg) |
+| macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-x64.dmg) |
+| Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-Setup.exe) |
+| Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-portable.zip) |
 
-[查看完整 v0.1.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.1.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
+[查看完整 v0.2.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.2.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
 
 ## 功能
 
@@ -28,6 +28,30 @@
 - Renderer 开启 Chromium 沙箱，关闭 Node integration
 - 复用原生目录选择器及平台相关 Harness 工具
 - 桌面应用退出时自动清理运行时子进程
+- 内置诊断与隐私安全的 Bug 报告 Skill
+
+## 配套 Skills
+
+桌面应用会打包 `.dsh/skills` 中的两个可选 Skill，并自动提供给内置 Harness：
+
+- `/diagnose-harness-desktop`：安全、只读地诊断桌面启动、API、会话、Profile、工具、权限和打包问题。
+- `/prepare-harness-bug-report`：把诊断证据脱敏整理成可复现的 GitHub Issue 草稿。
+
+当本仓库是当前工作区时，DeepSeek Harness 也会自动发现源码副本。若要在其他 Harness 安装中使用，可复制到默认用户 Skill 目录：
+
+```bash
+# macOS
+mkdir -p "$HOME/.dsh/skills"
+cp -R .dsh/skills/* "$HOME/.dsh/skills/"
+```
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force "$HOME\.dsh\skills"
+Copy-Item -Recurse -Force .dsh\skills\* "$HOME\.dsh\skills\"
+```
+
+Skill 默认不读取或输出 API 密钥，也不会在未经用户明确同意时发送测试请求、修改配置或提交 GitHub Issue。`npm test` 会使用项目锁定的 DeepSeek Harness 解析器检查 Skill 的发现结果和元数据。
 
 ## 当前发布状态
 
@@ -35,7 +59,7 @@
 | --- | --- | --- |
 | macOS Apple Silicon | DMG / ZIP | 已在真实桌面窗口中验证启动、现有 API 配置、会话及 Bash 工具调用 |
 | macOS Intel | DMG / ZIP | 由 GitHub Actions 原生构建；需要在 Intel Mac 上做最终启动验证 |
-| Windows x64 | NSIS 安装程序 / 便携 ZIP | 已在 macOS 交叉构建并检查 Windows 原生依赖；需要在 Windows 或 GitHub Actions 中做最终启动验证 |
+| Windows x64 | NSIS 安装程序 / 便携 ZIP | 已由 Windows GitHub Actions 原生构建；仍需在实体 Windows 桌面做最终人工验证 |
 
 仓库不包含签名证书，因此本地构建和 CI 产物默认未签名。macOS 第一次运行时可能需要在 Finder 中右键选择“打开”，Windows 可能显示 SmartScreen 提示。
 

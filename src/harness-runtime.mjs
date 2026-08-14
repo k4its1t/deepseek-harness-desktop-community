@@ -16,6 +16,11 @@ export function bundledDshBin({ appPath, resourcesPath, isPackaged }) {
   return join(runtimeRoot, 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js')
 }
 
+/** Resolve the companion skills shipped alongside the desktop runtime. */
+export function bundledSkillsDirectory({ appPath, resourcesPath, isPackaged }) {
+  return isPackaged ? join(resourcesPath, 'skills') : join(appPath, '.dsh', 'skills')
+}
+
 /** Accept only the exact loopback URL printed by `dsh web`. */
 export function parseDshWebUrl(line) {
   const match = /^dsh web:\s+(https?:\/\/[^\s]+)\s*$/.exec(line)
@@ -58,11 +63,12 @@ export function createLineReader(onLine) {
  * the installed desktop app does not require a separate system Node.js.
  */
 export class HarnessRuntime extends EventEmitter {
-  constructor({ executable, dshBin, dshHome, workingDirectory, log }) {
+  constructor({ executable, dshBin, dshHome, bundledSkills, workingDirectory, log }) {
     super()
     this.executable = executable
     this.dshBin = dshBin
     this.dshHome = dshHome
+    this.bundledSkills = bundledSkills
     this.workingDirectory = workingDirectory
     this.log = log
     this.child = undefined
@@ -81,6 +87,7 @@ export class HarnessRuntime extends EventEmitter {
         env: {
           ...process.env,
           DSH_HOME: this.dshHome,
+          DSH_BUNDLED_SKILL_DIR: this.bundledSkills,
           ELECTRON_RUN_AS_NODE: '1',
           NO_COLOR: '1',
         },
