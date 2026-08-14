@@ -16,6 +16,7 @@
 | macOS Intel | [下载 DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-x64.dmg) |
 | Windows x64 安装版 | [下载安装程序](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-Setup.exe) |
 | Windows x64 免安装版 | [下载便携 ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-portable.zip) |
+| 仅下载配套 Skill | [下载 Skill ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Companion-Skills-0.2.0.zip) |
 
 [查看完整 v0.2.0 发布说明与 SHA-256 校验](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.2.0)。产物尚未进行商业代码签名，请在安装前核对发布页面中的说明。
 

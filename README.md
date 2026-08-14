@@ -16,6 +16,7 @@ The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process,
 | macOS Intel | [Download DMG](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-macOS-x64.dmg) |
 | Windows x64 installer | [Download setup](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-Setup.exe) |
 | Windows x64 portable | [Download portable ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Community-0.2.0-Windows-x64-portable.zip) |
+| Companion skills only | [Download skills ZIP](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/download/v0.2.0/DeepSeek-Harness-Desktop-Companion-Skills-0.2.0.zip) |
 
 [View the full v0.2.0 release notes and SHA-256 checksums](https://github.com/k4its1t/deepseek-harness-desktop-community/releases/tag/v0.2.0). The artifacts are unsigned; review the release notes before installing.
 
