@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:">
+    <title>DeepSeek Harness Desktop Community</title>
+    <link rel="stylesheet" href="./loading.css">
+  </head>
+  <body>
+    <main class="card">
+      <img src="../build/icon.svg" alt="" width="84" height="84">
+      <h1>DeepSeek Harness</h1>
+      <p id="status">Starting the local agent runtime…</p>
+      <div id="spinner" class="spinner" aria-label="Loading"></div>
+    </main>
+    <script type="module" src="./loading.mjs"></script>
+  </body>
+</html>

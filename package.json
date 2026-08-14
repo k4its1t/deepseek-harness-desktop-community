@@ -1,0 +1,94 @@
+{
+  "name": "deepseek-harness-desktop-community",
+  "productName": "DeepSeek Harness Desktop Community",
+  "version": "0.1.0",
+  "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
+  "author": "DeepSeek Harness Desktop Community contributors",
+  "type": "module",
+  "main": "src/main.mjs",
+  "license": "MIT",
+  "private": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "postinstall": "npm run prepare:runtime",
+    "prepare:runtime": "npm ci --omit=dev --prefix runtime && node scripts/fix-runtime-permissions.mjs",
+    "prepare:runtime:mac:x64": "npm ci --omit=dev --prefix runtime --os=darwin --cpu=x64 && node scripts/fix-runtime-permissions.mjs darwin-x64",
+    "prepare:runtime:mac:arm64": "npm ci --omit=dev --prefix runtime --os=darwin --cpu=arm64 && node scripts/fix-runtime-permissions.mjs darwin-arm64",
+    "prepare:runtime:win:x64": "npm ci --omit=dev --prefix runtime --os=win32 --cpu=x64 && node scripts/fix-runtime-permissions.mjs win32-x64",
+    "start": "electron .",
+    "dev": "electron . --devtools",
+    "test": "node --test && npm run test:syntax",
+    "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs",
+    "smoke": "electron . --smoke-test",
+    "pack": "npm run prepare:runtime && electron-builder --dir",
+    "pack:mac": "npm run prepare:runtime && electron-builder --mac dir",
+    "dist:mac": "npm run dist:mac:x64 && npm run dist:mac:arm64",
+    "dist:mac:x64": "npm run prepare:runtime:mac:x64 && electron-builder --mac dmg zip --x64",
+    "dist:mac:arm64": "npm run prepare:runtime:mac:arm64 && electron-builder --mac dmg zip --arm64",
+    "dist:win": "npm run prepare:runtime:win:x64 && electron-builder --win nsis zip --x64"
+  },
+  "devDependencies": {
+    "electron": "43.4.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "community.deepseek-harness.desktop",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "build/icon.svg",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "package.json"
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "afterPack": "scripts/after-pack.mjs",
+    "extraResources": [
+      {
+        "from": "runtime",
+        "to": "runtime",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "dmg": {
+      "sign": false
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
+  }
+}

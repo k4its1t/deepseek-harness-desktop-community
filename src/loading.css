@@ -1,0 +1,53 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0f1020;
+  color: #f7f7ff;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, #28245d 0, #0f1020 55%);
+}
+
+.card {
+  width: min(420px, calc(100vw - 48px));
+  text-align: center;
+}
+
+h1 {
+  margin: 20px 0 8px;
+  font-size: 28px;
+}
+
+p {
+  min-height: 44px;
+  margin: 0;
+  color: #c7c8dc;
+  line-height: 1.5;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  margin: 28px auto 0;
+  border: 3px solid rgb(255 255 255 / 18%);
+  border-top-color: #a49cff;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.error p {
+  color: #ffb4b4;
+}
+
+.error .spinner {
+  display: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
