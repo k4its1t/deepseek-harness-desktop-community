@@ -21,6 +21,28 @@ export function bundledSkillsDirectory({ appPath, resourcesPath, isPackaged }) {
   return isPackaged ? join(resourcesPath, 'skills') : join(appPath, '.dsh', 'skills')
 }
 
+/** Resolve the desktop-only Web profile overlay from a physical resource. */
+export function bundledWebPatch({ appPath, resourcesPath, isPackaged }) {
+  const root = isPackaged ? resourcesPath : appPath
+  return join(root, 'desktop', 'cordis.patch.yml')
+}
+
+/** Build the Electron-as-Node and dsh arguments for the desktop Web runtime. */
+export function harnessWebArguments({ dshBin, webPatch }) {
+  return [
+    '--expose-internals',
+    dshBin,
+    '--profile',
+    'web',
+    '--patch',
+    webPatch,
+    '--host',
+    '127.0.0.1',
+    '--port',
+    '0',
+  ]
+}
+
 /** Accept only the exact loopback URL printed by `dsh web`. */
 export function parseDshWebUrl(line) {
   const match = /^dsh web:\s+(https?:\/\/[^\s]+)\s*$/.exec(line)
@@ -63,12 +85,13 @@ export function createLineReader(onLine) {
  * the installed desktop app does not require a separate system Node.js.
  */
 export class HarnessRuntime extends EventEmitter {
-  constructor({ executable, dshBin, dshHome, bundledSkills, workingDirectory, log }) {
+  constructor({ executable, dshBin, dshHome, bundledSkills, webPatch, workingDirectory, log }) {
     super()
     this.executable = executable
     this.dshBin = dshBin
     this.dshHome = dshHome
     this.bundledSkills = bundledSkills
+    this.webPatch = webPatch
     this.workingDirectory = workingDirectory
     this.log = log
     this.child = undefined
@@ -81,7 +104,7 @@ export class HarnessRuntime extends EventEmitter {
 
     const child = spawn(
       this.executable,
-      ['--expose-internals', this.dshBin, 'web', '--host', '127.0.0.1', '--port', '0'],
+      harnessWebArguments({ dshBin: this.dshBin, webPatch: this.webPatch }),
       {
         cwd: this.workingDirectory,
         env: {

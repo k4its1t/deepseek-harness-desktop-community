@@ -1,0 +1,14 @@
+# DeepSeek Harness Desktop always uses the in-app directory browser.
+#
+# The upstream auto picker selects platform-native dialogs on local macOS and
+# Windows hosts. A packaged Electron shell cannot reliably surface failures in
+# those external chooser processes, leaving an empty workspace registry with a
+# disabled composer and no actionable error. The browse interaction is the
+# upstream cross-platform implementation used by Harness' own Web E2E tests.
+- id: directory-picker
+  disabled: true
+- insert:
+    - id: directory-picker-browse
+      name: '@deepseek-ai/dsh-host-directory-picker-browse'
+    - id: ui-directory-picker-browse
+      name: '@deepseek-ai/dsh-client-ui-directory-picker-browse'

@@ -27,6 +27,7 @@ Do not assume a custom `DSH_HOME`, print credential contents, or recursively arc
 | `EACCES`, `EPERM`, or access denied during a tool call | Tool execution | Check the exact executable/path and platform permissions; do not broaden permissions globally. |
 | Missing `pty.node`, `spawn-helper`, `koffi`, or `sharp` binary | Packaging/native dependency | Record OS/architecture and installation artifact name; this is usually desktop packaging evidence. |
 | Session missing after restart | Profile/session | Confirm the active DSH data directory and profile before assuming deletion. |
+| Add/Select Workspace does nothing and the composer stays disabled | Profile/session directory picker | Confirm the workspace registry is empty and whether the desktop Web overlay pins the browse picker; do not unpack `app.asar` to inspect it. |
 
 ## Interpretation rules
 

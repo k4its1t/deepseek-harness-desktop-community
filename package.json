@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-desktop-community",
   "productName": "DeepSeek Harness Desktop",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
   "author": "DeepSeek Harness Desktop contributors",
   "type": "module",
@@ -37,7 +37,7 @@
   },
   "build": {
     "appId": "community.deepseek-harness.desktop",
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "artifactName": "DeepSeek-Harness-Desktop-${os}-${arch}.${ext}",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -66,6 +66,13 @@
       {
         "from": ".dsh/skills",
         "to": "skills",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "desktop",
+        "to": "desktop",
         "filter": [
           "**/*"
         ]
