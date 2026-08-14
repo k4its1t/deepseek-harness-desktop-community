@@ -16,7 +16,7 @@
 
 ### ✅ 本机验证
 
-- 10 项 Node.js 自动测试、JavaScript 语法检查和 3 个 Skill 校验通过。
+- 11 项 Node.js 自动测试、JavaScript 语法检查和 3 个 Skill 校验通过。
 - Apple Silicon `.app` 严格递归签名校验通过，Info.plist 已绑定，32,972 个资源已密封。
 - 打包后的应用成功启动内置 Harness Web UI，并输出 `DESKTOP_SMOKE_OK`。
 - 添加下载隔离属性后，代码签名完整性仍可验证；由于尚无 Developer ID 与公证，Gatekeeper 仍可能要求“仍要打开”。这次修的是包真的完整，不是假装有苹果证书，主打一个实诚 (￣▽￣)b。

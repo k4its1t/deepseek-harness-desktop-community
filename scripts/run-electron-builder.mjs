@@ -46,6 +46,16 @@ export function builderArguments({ platform, env, args }) {
   return result
 }
 
+export function builderEnvironment({ env, args }) {
+  const result = { ...env }
+  if (args.includes('--config.mac.identity=-')) {
+    // electron-builder otherwise skips even credential-free ad-hoc signing in
+    // pull-request builds. This flag is never added to Developer ID builds.
+    result.CSC_FOR_PULL_REQUEST = 'true'
+  }
+  return result
+}
+
 async function main() {
   const cliPath = join(projectDirectory, 'node_modules', 'electron-builder', 'cli.js')
   if (!existsSync(cliPath)) {
@@ -58,6 +68,10 @@ async function main() {
     env: process.env,
     args: originalArguments,
   })
+  const environmentForBuilder = builderEnvironment({
+    env: process.env,
+    args: argumentsForBuilder,
+  })
 
   if (
     process.platform === 'darwin' &&
@@ -69,7 +83,7 @@ async function main() {
 
   const child = spawn(process.execPath, [cliPath, ...argumentsForBuilder], {
     cwd: projectDirectory,
-    env: process.env,
+    env: environmentForBuilder,
     stdio: 'inherit',
   })
 

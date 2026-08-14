@@ -7,7 +7,7 @@ import {
   parseDshWebUrl,
 } from '../src/harness-runtime.mjs'
 import { resourcesDirectory } from '../scripts/after-pack.mjs'
-import { builderArguments } from '../scripts/run-electron-builder.mjs'
+import { builderArguments, builderEnvironment } from '../scripts/run-electron-builder.mjs'
 
 test('parses the loopback URL printed by dsh', () => {
   assert.equal(parseDshWebUrl('dsh web: http://127.0.0.1:63905'), 'http://127.0.0.1:63905/')
@@ -94,5 +94,18 @@ test('does not add a macOS identity to Windows builds', () => {
   assert.deepEqual(
     builderArguments({ platform: 'win32', env: {}, args: ['--win', 'nsis', '--x64'] }),
     ['--win', 'nsis', '--x64'],
+  )
+})
+
+test('allows only credential-free ad-hoc signing in pull-request builds', () => {
+  assert.equal(
+    builderEnvironment({ env: { GITHUB_EVENT_NAME: 'pull_request' }, args: ['--config.mac.identity=-'] })
+      .CSC_FOR_PULL_REQUEST,
+    'true',
+  )
+  assert.equal(
+    builderEnvironment({ env: { CSC_LINK: 'certificate' }, args: ['--mac', 'dir'] })
+      .CSC_FOR_PULL_REQUEST,
+    undefined,
   )
 })
