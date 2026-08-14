@@ -98,11 +98,13 @@ test('does not add a macOS identity to Windows builds', () => {
 })
 
 test('allows only credential-free ad-hoc signing in pull-request builds', () => {
-  assert.equal(
-    builderEnvironment({ env: { GITHUB_EVENT_NAME: 'pull_request' }, args: ['--config.mac.identity=-'] })
-      .CSC_FOR_PULL_REQUEST,
-    'true',
-  )
+  const adHocEnvironment = builderEnvironment({
+    env: { GITHUB_EVENT_NAME: 'pull_request', CSC_LINK: '', APPLE_ID: '' },
+    args: ['--config.mac.identity=-'],
+  })
+  assert.equal(adHocEnvironment.CSC_FOR_PULL_REQUEST, 'true')
+  assert.equal(adHocEnvironment.CSC_LINK, undefined)
+  assert.equal(adHocEnvironment.APPLE_ID, undefined)
   assert.equal(
     builderEnvironment({ env: { CSC_LINK: 'certificate' }, args: ['--mac', 'dir'] })
       .CSC_FOR_PULL_REQUEST,

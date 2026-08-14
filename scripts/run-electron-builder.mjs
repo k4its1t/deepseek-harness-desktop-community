@@ -52,6 +52,15 @@ export function builderEnvironment({ env, args }) {
     // electron-builder otherwise skips even credential-free ad-hoc signing in
     // pull-request builds. This flag is never added to Developer ID builds.
     result.CSC_FOR_PULL_REQUEST = 'true'
+    for (const name of [
+      'CSC_LINK',
+      'CSC_KEY_PASSWORD',
+      'APPLE_ID',
+      'APPLE_APP_SPECIFIC_PASSWORD',
+      'APPLE_TEAM_ID',
+    ]) {
+      delete result[name]
+    }
   }
   return result
 }

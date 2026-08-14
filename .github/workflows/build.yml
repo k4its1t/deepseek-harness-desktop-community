@@ -47,13 +47,16 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run ${{ matrix.script }}
+      - if: runner.os == 'macOS'
+        run: npm run ${{ matrix.script }}
         env:
-          CSC_LINK: ${{ github.event_name != 'pull_request' && runner.os == 'macOS' && secrets.MACOS_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ github.event_name != 'pull_request' && runner.os == 'macOS' && secrets.MACOS_CSC_KEY_PASSWORD || '' }}
-          APPLE_ID: ${{ github.event_name != 'pull_request' && runner.os == 'macOS' && secrets.MACOS_APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name != 'pull_request' && runner.os == 'macOS' && secrets.MACOS_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ github.event_name != 'pull_request' && runner.os == 'macOS' && secrets.MACOS_TEAM_ID || '' }}
+          CSC_LINK: ${{ github.event_name != 'pull_request' && secrets.MACOS_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ github.event_name != 'pull_request' && secrets.MACOS_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ github.event_name != 'pull_request' && secrets.MACOS_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name != 'pull_request' && secrets.MACOS_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ github.event_name != 'pull_request' && secrets.MACOS_TEAM_ID || '' }}
+      - if: runner.os == 'Windows'
+        run: npm run ${{ matrix.script }}
       - if: runner.os == 'macOS'
         run: npm run verify:mac:signature
       - uses: actions/upload-artifact@v6
