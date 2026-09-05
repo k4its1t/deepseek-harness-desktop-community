@@ -85,7 +85,7 @@ export function createLineReader(onLine) {
  * the installed desktop app does not require a separate system Node.js.
  */
 export class HarnessRuntime extends EventEmitter {
-  constructor({ executable, dshBin, dshHome, bundledSkills, webPatch, workingDirectory, log }) {
+  constructor({ executable, dshBin, dshHome, bundledSkills, webPatch, workingDirectory, log, diagnosticLogging = false }) {
     super()
     this.executable = executable
     this.dshBin = dshBin
@@ -94,6 +94,7 @@ export class HarnessRuntime extends EventEmitter {
     this.webPatch = webPatch
     this.workingDirectory = workingDirectory
     this.log = log
+    this.diagnosticLogging = diagnosticLogging
     this.child = undefined
     this.stopping = false
   }
@@ -133,11 +134,13 @@ export class HarnessRuntime extends EventEmitter {
       }, STARTUP_TIMEOUT_MS)
 
       const stdout = createLineReader((line) => {
-        this.log('info', `[dsh] ${line}`)
+        if (this.diagnosticLogging) this.log('info', `[dsh] ${line}`)
         const url = parseDshWebUrl(line)
         if (url) settle(() => resolve(url))
       })
-      const stderr = createLineReader((line) => this.log('error', `[dsh] ${line}`))
+      const stderr = createLineReader((line) => {
+        if (this.diagnosticLogging) this.log('error', `[dsh] ${line}`)
+      })
       child.stdout.on('data', chunk => stdout.push(chunk))
       child.stderr.on('data', chunk => stderr.push(chunk))
 
@@ -172,7 +175,7 @@ export class HarnessRuntime extends EventEmitter {
       }
       const forceTimer = setTimeout(() => {
         if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL')
-        finish()
+        else finish()
       }, SHUTDOWN_TIMEOUT_MS)
       child.once('exit', finish)
       if (!child.kill('SIGTERM')) finish()

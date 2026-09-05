@@ -2,6 +2,14 @@
 
 这里记录 DeepSeek Harness Desktop 的最新发布内容。项目采用 **Vibe Coding** 方式开发，维护者负责目标、素材选择与发布决策，**Codex (OpenAI)** 作为开发贡献者参与实现、测试、打包和文档整理。
 
+## Unreleased
+
+- 新增本地桌面外观、持久化缩放、窗口尺寸记忆及恢复默认设置菜单；不修改 Harness 的账户与会话数据。
+- 运行时详细输出改为显式开启的诊断日志，默认只保留桌面生命周期日志。
+- 修复退出时未等待运行时清理的问题，保留强制终止超时。
+- 更新锁文件中的 `fast-uri`、`qs` 和 `@xmldom/xmldom`，移除本轮已识别的依赖安全公告匹配。
+- Added desktop preferences, opt-in runtime diagnostic logging, awaited shutdown, and targeted dependency security updates.
+
 ## v0.3.2 — 2026-08-14
 
 ### 📁 工作区选择器恢复营业

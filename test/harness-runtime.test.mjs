@@ -1,15 +1,60 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import {
   bundledDshBin,
   bundledSkillsDirectory,
   bundledWebPatch,
   createLineReader,
   harnessWebArguments,
+  HarnessRuntime,
   parseDshWebUrl,
 } from '../src/harness-runtime.mjs'
 import { resourcesDirectory } from '../scripts/after-pack.mjs'
 import { builderArguments, builderEnvironment } from '../scripts/run-electron-builder.mjs'
+
+test('runtime output stays private unless diagnostic logging is explicitly enabled', async (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'dsh-runtime-'))
+  const bin = join(directory, 'child.mjs')
+  writeFileSync(bin, `console.log('private runtime stdout'); console.error('private runtime stderr');
+console.log('dsh web: http://127.0.0.1:49152'); setInterval(() => {}, 1000);`)
+  t.after(() => rmSync(directory, { recursive: true, force: true }))
+  for (const diagnosticLogging of [false, true]) {
+    const logs = []
+    const runtime = new HarnessRuntime({ executable: process.execPath, dshBin: bin,
+      dshHome: directory, bundledSkills: directory, webPatch: bin, workingDirectory: directory,
+      log: (_level, message) => logs.push(message), diagnosticLogging })
+    t.after(() => runtime.stop())
+    assert.equal(await runtime.start(), 'http://127.0.0.1:49152/')
+    await runtime.stop()
+    assert.equal(runtime.child, undefined)
+    if (diagnosticLogging) assert.ok(logs.some(line => line.includes('private runtime stdout')))
+    else assert.deepEqual(logs, [])
+  }
+})
+
+test('shutdown kills a child that ignores SIGTERM without reporting an unexpected exit', { skip: process.platform === 'win32' }, async (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'dsh-runtime-stop-'))
+  const bin = join(directory, 'child.mjs')
+  writeFileSync(bin, `process.on('SIGTERM', () => {});
+console.log('dsh web: http://127.0.0.1:49152'); setInterval(() => {}, 1000);`)
+  const runtime = new HarnessRuntime({ executable: process.execPath, dshBin: bin,
+    dshHome: directory, bundledSkills: directory, webPatch: bin, workingDirectory: directory,
+    log: () => {} })
+  t.after(async () => { await runtime.stop(); rmSync(directory, { recursive: true, force: true }) })
+  let unexpected = false
+  runtime.on('unexpected-exit', () => { unexpected = true })
+  await runtime.start()
+  const child = runtime.child
+  let exited = false
+  child.once('exit', () => { exited = true })
+  await runtime.stop()
+  assert.equal(exited, true)
+  assert.equal(child.signalCode, 'SIGKILL')
+  assert.equal(unexpected, false)
+})
 
 test('parses the loopback URL printed by dsh', () => {
   assert.equal(parseDshWebUrl('dsh web: http://127.0.0.1:63905'), 'http://127.0.0.1:63905/')

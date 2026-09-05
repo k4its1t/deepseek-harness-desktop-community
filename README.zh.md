@@ -124,6 +124,15 @@ npm start
 
 首次运行会进入 DeepSeek Harness 标准引导流程。已经使用 CLI 的用户会自动复用 `~/.dsh`；也可以在启动应用前通过 `DSH_HOME` 指定其他位置。
 
+## 桌面设置
+
+- **Settings → System Appearance**：选择提供给 Harness 的系统外观。Harness 自身的主题需选择 **System（跟随系统）**，此偏好才会生效。
+- **View → Zoom In / Zoom Out / Actual Size**：调整文字缩放，重启后保留；对应快捷键显示在菜单中。
+- 窗口会记住最后一次非最大化尺寸，再次打开时适配当前屏幕。
+- **Settings → Reset Desktop Settings**：恢复桌面外观、缩放、窗口尺寸和诊断日志的默认值，不修改 Harness 凭据、会话或工作区。
+
+偏好保存在 Electron 用户应用数据目录的 `desktop-settings.json`，与 `DSH_HOME` 分开。
+
 ## 测试
 
 ```bash
@@ -149,7 +158,7 @@ Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop.e
 
 ## 日志与数据
 
-通过 **File → Open Log Folder** 或 **File → Open DSH Data Folder** 打开目录。桌面壳只记录生命周期日志；常规数据仍由 DeepSeek Harness 保存在 `~/.dsh`。
+通过 **File → Open Log Folder** 或 **File → Open DSH Data Folder** 打开目录。桌面壳默认记录生命周期日志；常规数据仍由 DeepSeek Harness 保存在 `~/.dsh`。排查故障时可开启 **Settings → Diagnostic Runtime Logging**，额外记录子进程输出，其中可能包含私人路径或会话数据。排查完成后请关闭，并在分享前检查日志。切换此设置不会删除已有日志。
 
 ## 参与与反馈
 

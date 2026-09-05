@@ -1,7 +1,8 @@
 import { appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { app, BrowserWindow, dialog, Menu, session, shell } from 'electron'
+import { app, BrowserWindow, dialog, Menu, nativeTheme, screen, session, shell } from 'electron'
+import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './desktop-settings.mjs'
 import {
   HarnessRuntime,
   bundledDshBin,
@@ -21,6 +22,9 @@ let runtime
 let allowedOrigin
 let logFile
 let quitting = false
+let shutdownComplete = false
+let settings
+let settingsPath
 
 app.setName(APP_NAME)
 
@@ -62,9 +66,10 @@ async function showLoading(status = 'starting', message = '') {
 }
 
 function createWindow() {
+  const workArea = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
-    width: 1440,
-    height: 920,
+    width: Math.min(settings.windowSize.width, workArea.width),
+    height: Math.min(settings.windowSize.height, workArea.height),
     minWidth: 900,
     minHeight: 640,
     show: false,
@@ -80,6 +85,9 @@ function createWindow() {
   })
 
   window.once('ready-to-show', () => window.show())
+  window.webContents.on('did-finish-load', () => {
+    window.webContents.setZoomFactor(settings.zoomFactor)
+  })
   window.webContents.on('will-navigate', (event, target) => {
     if (isAllowedNavigation(target)) return
     event.preventDefault()
@@ -90,10 +98,26 @@ function createWindow() {
     openExternal(url)
     return { action: 'deny' }
   })
+  window.on('close', () => {
+    const { width, height } = window.getNormalBounds()
+    updateSettings({ windowSize: { width, height } })
+  })
   window.on('closed', () => {
     if (mainWindow === window) mainWindow = undefined
   })
   return window
+}
+
+function updateSettings(change) {
+  settings = { ...settings, ...change }
+  nativeTheme.themeSource = settings.theme
+  if (runtime) runtime.diagnosticLogging = settings.diagnosticLogging
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(settings.zoomFactor)
+  try {
+    saveSettings(settingsPath, settings)
+  } catch {
+    dialog.showErrorBox('Unable to save desktop settings', 'Your changes apply for this session only. Check that the application data folder is writable.')
+  }
 }
 
 function installMenu() {
@@ -134,8 +158,54 @@ function installMenu() {
         { role: 'forceReload' },
         ...(openDevTools || !app.isPackaged ? [{ role: 'toggleDevTools' }] : []),
         { type: 'separator' },
-        { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },
+        { label: 'Actual Size', accelerator: 'CmdOrCtrl+0', click: () => updateSettings({ zoomFactor: 1 }) },
+        { label: 'Zoom In', accelerator: 'CmdOrCtrl+Plus', click: () => updateSettings({ zoomFactor: Math.min(2, Math.round((settings.zoomFactor + 0.1) * 100) / 100) }) },
+        { label: 'Zoom Out', accelerator: 'CmdOrCtrl+-', click: () => updateSettings({ zoomFactor: Math.max(0.75, Math.round((settings.zoomFactor - 0.1) * 100) / 100) }) },
         { type: 'separator' }, { role: 'togglefullscreen' },
+      ],
+    },
+    {
+      label: 'Settings',
+      submenu: [
+        {
+          label: 'System Appearance',
+          submenu: ['system', 'light', 'dark'].map(theme => ({
+            label: theme === 'system' ? 'Follow Operating System' : theme === 'light' ? 'Light' : 'Dark',
+            type: 'radio',
+            checked: settings.theme === theme,
+            click: () => updateSettings({ theme }),
+          })),
+        },
+        {
+          label: 'Diagnostic Runtime Logging',
+          type: 'checkbox',
+          checked: settings.diagnosticLogging,
+          click: async (item) => {
+            if (item.checked) {
+              const result = await dialog.showMessageBox({
+                type: 'warning',
+                message: 'Enable diagnostic runtime logging?',
+                detail: 'Runtime output may contain private paths or conversation data. Enable it only while troubleshooting, and review logs before sharing them.',
+                buttons: ['Cancel', 'Enable'], defaultId: 0, cancelId: 0,
+              })
+              item.checked = result.response === 1
+            }
+            updateSettings({ diagnosticLogging: item.checked })
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Reset Desktop Settings',
+          click: () => {
+            updateSettings({ ...DEFAULT_SETTINGS, windowSize: { ...DEFAULT_SETTINGS.windowSize } })
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              const area = screen.getPrimaryDisplay().workAreaSize
+              mainWindow.setSize(Math.min(1440, area.width), Math.min(920, area.height))
+              mainWindow.center()
+            }
+            installMenu()
+          },
+        },
       ],
     },
     { label: 'Window', submenu: [{ role: 'minimize' }, { role: 'zoom' }] },
@@ -157,6 +227,12 @@ async function waitForUiReady(window) {
 }
 
 async function boot() {
+  if (quitting) return
+  const desktopDirectory = app.getPath('userData')
+  mkdirSync(desktopDirectory, { recursive: true })
+  settingsPath = join(desktopDirectory, 'desktop-settings.json')
+  settings = loadSettings(settingsPath)
+  nativeTheme.themeSource = settings.theme
   const logsDirectory = app.getPath('logs')
   mkdirSync(logsDirectory, { recursive: true })
   logFile = join(logsDirectory, 'desktop.log')
@@ -182,6 +258,7 @@ async function boot() {
     }),
     workingDirectory: app.getPath('home'),
     log,
+    diagnosticLogging: settings.diagnosticLogging,
   })
   runtime.on('unexpected-exit', (reason) => {
     if (quitting) return
@@ -201,11 +278,14 @@ async function boot() {
   mainWindow = createWindow()
   installMenu()
   await showLoading()
+  if (quitting) return
 
   const url = await runtime.start()
+  if (quitting) return
   allowedOrigin = new URL(url).origin
   log('info', `Loading local Web UI from ${allowedOrigin}`)
   await mainWindow.loadURL(url)
+  if (quitting) return
 
   if (openDevTools) mainWindow.webContents.openDevTools({ mode: 'detach' })
   if (isSmokeTest) {
@@ -228,6 +308,7 @@ if (!hasLock) {
   })
 
   app.whenReady().then(boot).catch(async (error) => {
+    if (quitting) return
     log('error', error?.stack || String(error))
     if (!isSmokeTest) dialog.showErrorBox('Unable to start DeepSeek Harness', error?.message || String(error))
     await runtime?.stop()
@@ -236,7 +317,7 @@ if (!hasLock) {
 }
 
 app.on('activate', () => {
-  if (!mainWindow && runtime) {
+  if (!quitting && !mainWindow && runtime) {
     mainWindow = createWindow()
     const loadWindow = allowedOrigin ? mainWindow.loadURL(allowedOrigin) : showLoading()
     void loadWindow.catch(error => log('error', `Unable to restore application window: ${error.message}`))
@@ -247,7 +328,15 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-app.on('before-quit', () => {
+app.on('before-quit', (event) => {
+  if (shutdownComplete) return
+  event.preventDefault()
+  if (quitting) return
   quitting = true
-  void runtime?.stop()
+  Promise.resolve(runtime?.stop())
+    .catch(() => log('error', 'Unable to stop the local runtime cleanly'))
+    .finally(() => {
+      shutdownComplete = true
+      app.quit()
+    })
 })

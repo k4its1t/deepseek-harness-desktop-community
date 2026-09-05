@@ -124,6 +124,15 @@ npm start
 
 The first launch uses the standard DeepSeek Harness onboarding flow. Existing CLI users automatically reuse `~/.dsh`. You can override the location by setting `DSH_HOME` before launching the app.
 
+## Desktop settings
+
+- **Settings → System Appearance** chooses the system color scheme reported to Harness. Keep Harness' own theme set to **System** for this preference to apply.
+- **View → Zoom In / Zoom Out / Actual Size** adjusts text size and remembers it after relaunch. Keyboard shortcuts are shown in the menu.
+- The window remembers its last non-maximized size and fits it to the current display on opening.
+- **Settings → Reset Desktop Settings** restores desktop appearance, zoom, window size, and diagnostic logging defaults. It does not change Harness credentials, sessions, or workspaces.
+
+These preferences are saved in `desktop-settings.json` in Electron's per-user application data directory, separately from `DSH_HOME`.
+
 ## Test
 
 ```bash
@@ -149,7 +158,7 @@ The Windows portable ZIP can be extracted and run via `DeepSeek Harness Desktop.
 
 ## Logs and data
 
-Use **File → Open Log Folder** or **File → Open DSH Data Folder**. The wrapper writes lifecycle logs only; DeepSeek Harness owns its normal data under `~/.dsh`.
+Use **File → Open Log Folder** or **File → Open DSH Data Folder**. The wrapper writes lifecycle logs by default; DeepSeek Harness owns its normal data under `~/.dsh`. To troubleshoot, enable **Settings → Diagnostic Runtime Logging**. This also records child-process output, which can contain private paths or conversation data. Disable it after troubleshooting and review logs before sharing. Changing this setting does not delete existing logs.
 
 ## Community and feedback
 
