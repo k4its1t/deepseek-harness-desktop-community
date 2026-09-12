@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, stat, symlink, readlink, cp } from 'node:fs/promises'
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, stat, symlink, readlink, cp, rename } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { inspectUpgrade, backupUpgrade, recordFreshInstall } from '../src/upgrade-backup.mjs'
@@ -26,6 +26,17 @@ test('successful fresh startup is recorded so relaunch does not request an upgra
   await writeFile(join(options.dshHome, 'settings.yaml'), 'created by first startup')
   await recordFreshInstall(options)
   assert.equal((await inspectUpgrade(options)).required, false)
+})
+
+test('restoring a different data directory at the same path requires a new backup', async t => {
+  const options = await fixture(t)
+  await mkdir(options.dshHome)
+  await writeFile(join(options.dshHome, 'settings.yaml'), 'first dataset')
+  await backupUpgrade(await inspectUpgrade(options), options)
+  await rename(options.dshHome, `${options.dshHome}-previous`)
+  await mkdir(options.dshHome)
+  await writeFile(join(options.dshHome, 'settings.yaml'), 'restored dataset')
+  assert.equal((await inspectUpgrade(options)).required, true)
 })
 
 test('backup protects credentials and sessions, excludes dependencies, and is repeatable', async t => {

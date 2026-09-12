@@ -37,24 +37,26 @@ export async function inspectUpgrade({ dshHome, stateDirectory, runtimeVersion }
     return { required: false, fresh: true }
   }
   const key = createHash('sha256').update(source).update('\0').update(runtimeVersion).digest('hex')
+  const sourceStat = await lstat(source)
+  const sourceIdentity = `${sourceStat.dev}:${sourceStat.ino}:${sourceStat.birthtimeMs}`
   const receipt = join(stateDirectory, 'upgrades', `${key}.json`)
   try {
     const saved = JSON.parse(await readFile(receipt, 'utf8'))
-    if (saved.complete && saved.source === source && saved.runtimeVersion === runtimeVersion) {
+    if (saved.complete && saved.source === source && saved.sourceIdentity === sourceIdentity && saved.runtimeVersion === runtimeVersion) {
       return { required: false, backup: saved.backup }
     }
   } catch (error) {
     if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error
   }
   const entries = await inventory(source)
-  return { required: entries.length > 0, fresh: entries.length === 0, source, receipt, runtimeVersion, entries }
+  return { required: entries.length > 0, fresh: entries.length === 0, source, sourceIdentity, receipt, runtimeVersion, entries }
 }
 
 export async function recordFreshInstall(options) {
   const plan = await inspectUpgrade(options)
   if (!plan.receipt) return
   await privateDirectory(join(plan.receipt, '..'))
-  await writeFile(`${plan.receipt}.tmp`, JSON.stringify({ complete: true, source: plan.source, runtimeVersion: options.runtimeVersion, freshInstall: true }), { mode: 0o600 })
+  await writeFile(`${plan.receipt}.tmp`, JSON.stringify({ complete: true, source: plan.source, sourceIdentity: plan.sourceIdentity, runtimeVersion: options.runtimeVersion, freshInstall: true }), { mode: 0o600 })
   await rename(`${plan.receipt}.tmp`, plan.receipt)
 }
 
@@ -81,7 +83,7 @@ export async function backupUpgrade(plan, { backupRoot, copy = cp } = {}) {
   if (before !== JSON.stringify(await inventory(plan.source))) {
     throw new Error(`Harness data changed during backup. Close other Harness processes and retry. Incomplete backup: ${backup}`)
   }
-  const result = { complete: true, source: plan.source, runtimeVersion: plan.runtimeVersion, backup, createdAt: new Date().toISOString() }
+  const result = { complete: true, source: plan.source, sourceIdentity: plan.sourceIdentity, runtimeVersion: plan.runtimeVersion, backup, createdAt: new Date().toISOString() }
   await writeFile(join(backup, 'manifest.json'), JSON.stringify(result, null, 2), { mode: 0o600 })
   const receiptDirectory = join(plan.receipt, '..')
   await privateDirectory(receiptDirectory)
