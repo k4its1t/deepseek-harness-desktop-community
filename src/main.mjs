@@ -1,7 +1,8 @@
-import { appendFileSync, mkdirSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { app, BrowserWindow, dialog, Menu, nativeTheme, screen, session, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, screen, session, shell } from 'electron'
+import { inspectUpgrade, backupUpgrade, recordFreshInstall } from './upgrade-backup.mjs'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './desktop-settings.mjs'
 import {
   HarnessRuntime,
@@ -25,8 +26,15 @@ let quitting = false
 let shutdownComplete = false
 let settings
 let settingsPath
+let starting = false
+let runtimeVersion
 
 app.setName(APP_NAME)
+// Test harnesses isolate Electron state as well as DSH_HOME.
+if ((isSmokeTest || process.argv.includes('--desktop-e2e')) && process.env.DSH_DESKTOP_TEST_ROOT) {
+  app.setPath('userData', join(process.env.DSH_DESKTOP_TEST_ROOT, 'electron'))
+  app.setPath('logs', join(process.env.DSH_DESKTOP_TEST_ROOT, 'logs'))
+}
 
 function log(level, message) {
   const row = `${new Date().toISOString()} [${level.toUpperCase()}] ${message}\n`
@@ -81,6 +89,7 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
       webSecurity: true,
+      preload: join(import.meta.dirname, 'loading-preload.cjs'),
     },
   })
 
@@ -209,6 +218,13 @@ function installMenu() {
       ],
     },
     { label: 'Window', submenu: [{ role: 'minimize' }, { role: 'zoom' }] },
+    { label: 'Help', submenu: [
+      { label: 'About DeepSeek Harness Desktop', click: () => dialog.showMessageBox({
+        type: 'info', message: `${APP_NAME} ${app.getVersion()}`,
+        detail: `Harness ${runtimeVersion}\nUnofficial community project · Vibe Coding with Codex`,
+      }) },
+      { label: 'Upgrade backups', click: () => void shell.openPath(join(app.getPath('userData'), 'upgrade-backups')) },
+    ] },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
@@ -256,12 +272,16 @@ async function boot() {
       resourcesPath: process.resourcesPath,
       isPackaged: app.isPackaged,
     }),
-    workingDirectory: app.getPath('home'),
+    workingDirectory: (isSmokeTest || process.argv.includes('--desktop-e2e')) && process.env.DSH_DESKTOP_TEST_ROOT
+      ? process.env.DSH_DESKTOP_TEST_ROOT : app.getPath('home'),
     log,
-    diagnosticLogging: settings.diagnosticLogging,
+    diagnosticLogging: isSmokeTest || process.argv.includes('--desktop-e2e') || settings.diagnosticLogging,
   })
+  runtimeVersion = JSON.parse(readFileSync(join(runtime.dshBin, '..', '..', 'package.json'), 'utf8')).version
+  app.setAboutPanelOptions({ applicationName: APP_NAME, applicationVersion: app.getVersion(), version: `Harness ${runtimeVersion}`, credits: 'Vibe Coding · Codex contributor · Unofficial community project' })
   runtime.on('unexpected-exit', (reason) => {
-    if (quitting) return
+    if (quitting || starting) return
+    allowedOrigin = undefined
     log('error', `DeepSeek Harness stopped unexpectedly: ${reason}`)
     if (isSmokeTest) {
       app.exit(1)
@@ -276,24 +296,59 @@ async function boot() {
   session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
   session.defaultSession.setPermissionCheckHandler(() => false)
   mainWindow = createWindow()
-  installMenu()
-  await showLoading()
-  if (quitting) return
-
-  const url = await runtime.start()
-  if (quitting) return
-  allowedOrigin = new URL(url).origin
-  log('info', `Loading local Web UI from ${allowedOrigin}`)
-  await mainWindow.loadURL(url)
-  if (quitting) return
-
-  if (openDevTools) mainWindow.webContents.openDevTools({ mode: 'detach' })
-  if (isSmokeTest) {
-    await waitForUiReady(mainWindow)
-    console.log('DESKTOP_SMOKE_OK')
-    await runtime.stop()
-    app.quit()
+  const requireRecoveryPage = (event) => {
+    if (event.sender !== mainWindow?.webContents || event.senderFrame !== event.sender.mainFrame) throw new Error('Invalid recovery caller')
+    const url = new URL(event.senderFrame.url)
+    if (url.protocol !== 'file:' || url.pathname !== loadingPageUrl.pathname) throw new Error('Recovery is only available on the local loading page')
   }
+  ipcMain.handle('desktop:retry', async (event) => { requireRecoveryPage(event); await startRuntime() })
+  ipcMain.handle('desktop:open-logs', async (event) => { requireRecoveryPage(event); await shell.openPath(app.getPath('logs')) })
+  installMenu()
+  await startRuntime()
+}
+
+async function startRuntime() {
+  if (starting || quitting) return
+  starting = true
+  allowedOrigin = undefined
+  try {
+    await runtime.stop()
+    await showLoading()
+    const plan = await inspectUpgrade({ dshHome: runtime.dshHome, stateDirectory: app.getPath('userData'), runtimeVersion })
+    if (plan.required) {
+      if (isSmokeTest) throw new Error('Smoke tests require a fresh isolated DSH_HOME; existing data will not be migrated automatically')
+      const result = await dialog.showMessageBox(mainWindow, {
+        type: 'info', message: 'Back up Harness data before upgrading / 升级前备份',
+        detail: `Close CLI and other Harness instances using this data first.\n请先关闭使用此数据目录的 CLI 和其他 Harness 实例。\n\n${runtime.dshHome}\n\nA private backup will be created before Harness ${runtimeVersion} starts. Do not restart older clients against upgraded data.`,
+        buttons: ['Cancel / 取消', 'Closed other instances — Back up / 已关闭其他实例，开始备份'], defaultId: 0, cancelId: 0,
+      })
+      if (result.response !== 1) throw new Error('Upgrade paused. Close other Harness instances, then click Retry to back up and continue. / 升级已暂停，请关闭其他实例后重试。')
+      await showLoading('starting', 'Backing up existing Harness data…')
+      await backupUpgrade(plan, { backupRoot: join(app.getPath('userData'), 'upgrade-backups') })
+    }
+    if (quitting) return
+    const url = await runtime.start()
+    if (quitting) return
+    allowedOrigin = new URL(url).origin
+    log('info', `Loading local Web UI from ${allowedOrigin}`)
+    await mainWindow.loadURL(url)
+    if (plan.fresh) await recordFreshInstall({ dshHome: runtime.dshHome, stateDirectory: app.getPath('userData'), runtimeVersion })
+    if (quitting) return
+
+    if (openDevTools) mainWindow.webContents.openDevTools({ mode: 'detach' })
+    if (isSmokeTest) {
+      await waitForUiReady(mainWindow)
+      console.log('DESKTOP_SMOKE_OK')
+      await runtime.stop()
+      app.quit()
+    }
+  } catch (error) {
+    allowedOrigin = undefined
+    await runtime.stop()
+    log('error', 'Runtime startup failed; see the recovery page for details')
+    if (isSmokeTest) { console.error(error.message); app.exit(1); return }
+    await showLoading('error', error.message)
+  } finally { starting = false }
 }
 
 const hasLock = app.requestSingleInstanceLock()

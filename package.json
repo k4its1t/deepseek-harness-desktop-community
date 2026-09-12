@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-desktop-community",
   "productName": "DeepSeek Harness Desktop",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "An unofficial open-source desktop shell for the DeepSeek Harness Web UI on macOS and Windows.",
   "author": "DeepSeek Harness Desktop contributors",
   "type": "module",
@@ -12,6 +12,11 @@
     "node": ">=22"
   },
   "scripts": {
+    "notices": "node scripts/third-party-notices.mjs",
+    "test:e2e": "node scripts/e2e-desktop.mjs",
+    "test:migration": "node scripts/e2e-desktop.mjs --migration",
+    "test:package": "node scripts/test-package.mjs",
+    "prepare:legacy-test": "npm ci --omit=dev --prefix test/fixtures/legacy-runtime",
     "postinstall": "npm run prepare:runtime",
     "prepare:runtime": "npm ci --omit=dev --prefix runtime && node scripts/fix-runtime-permissions.mjs",
     "prepare:runtime:mac:x64": "npm ci --omit=dev --prefix runtime --os=darwin --cpu=x64 && node scripts/fix-runtime-permissions.mjs darwin-x64",
@@ -19,10 +24,10 @@
     "prepare:runtime:win:x64": "npm ci --omit=dev --prefix runtime --os=win32 --cpu=x64 && node scripts/fix-runtime-permissions.mjs win32-x64",
     "start": "electron .",
     "dev": "electron . --devtools",
-    "test": "node --test && npm run test:syntax && npm run test:skills",
+    "test": "node --test test/desktop-settings.test.mjs test/harness-runtime.test.mjs test/upgrade-backup.test.mjs && npm run test:syntax && npm run test:skills",
     "test:syntax": "node --check src/main.mjs && node --check src/harness-runtime.mjs && node --check src/loading.mjs && node --check scripts/after-pack.mjs && node --check scripts/fix-runtime-permissions.mjs && node --check scripts/macos-sign.mjs && node --check scripts/run-electron-builder.mjs && node --check scripts/validate-skills.mjs && node --check scripts/verify-macos-signature.mjs",
     "test:skills": "node scripts/validate-skills.mjs",
-    "smoke": "electron . --smoke-test",
+    "smoke": "node scripts/smoke-desktop.mjs",
     "pack": "npm run prepare:runtime && node scripts/run-electron-builder.mjs --dir",
     "pack:mac": "npm run prepare:runtime && node scripts/run-electron-builder.mjs --mac dir",
     "dist:mac": "npm run dist:mac:x64 && npm run dist:mac:arm64",
@@ -33,7 +38,8 @@
   },
   "devDependencies": {
     "electron": "43.4.0",
-    "electron-builder": "26.15.3"
+    "electron-builder": "26.15.3",
+    "playwright": "1.63.0"
   },
   "build": {
     "appId": "community.deepseek-harness.desktop",
@@ -49,6 +55,7 @@
       "build/icon.ico",
       "LICENSE",
       "THIRD_PARTY_NOTICES.md",
+      "THIRD_PARTY_LICENSES.md",
       "CONTRIBUTORS.md",
       "package.json"
     ],

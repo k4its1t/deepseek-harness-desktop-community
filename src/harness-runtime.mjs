@@ -1,4 +1,5 @@
-import { spawn } from 'node:child_process'
+import { spawn, execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { EventEmitter } from 'node:events'
 import { join } from 'node:path'
 
@@ -36,6 +37,7 @@ export function harnessWebArguments({ dshBin, webPatch }) {
     'web',
     '--patch',
     webPatch,
+    '--no-open',
     '--host',
     '127.0.0.1',
     '--port',
@@ -63,6 +65,21 @@ export function parseDshWebUrl(line) {
   return parsed.href
 }
 
+/** Startup URLs are bearer credentials, including in opt-in diagnostics. */
+export function redactRuntimeLine(line) {
+  if (/dsh web:/i.test(line)) return '[dsh] Local Web UI ready (authentication URL omitted)'
+  return line.replace(/https?:\/\/[^\s<>"']+/g, (value) => {
+    try {
+      const url = new URL(value)
+      url.username = ''
+      url.password = ''
+      url.search = ''
+      url.hash = ''
+      return url.href
+    } catch { return '[URL omitted]' }
+  })
+}
+
 /** Preserve partial lines when child-process chunks split the startup URL. */
 export function createLineReader(onLine) {
   let pending = ''
@@ -85,7 +102,7 @@ export function createLineReader(onLine) {
  * the installed desktop app does not require a separate system Node.js.
  */
 export class HarnessRuntime extends EventEmitter {
-  constructor({ executable, dshBin, dshHome, bundledSkills, webPatch, workingDirectory, log, diagnosticLogging = false }) {
+  constructor({ executable, dshBin, dshHome, bundledSkills, webPatch, workingDirectory, log, diagnosticLogging = false, startupTimeoutMs = STARTUP_TIMEOUT_MS }) {
     super()
     this.executable = executable
     this.dshBin = dshBin
@@ -95,6 +112,7 @@ export class HarnessRuntime extends EventEmitter {
     this.workingDirectory = workingDirectory
     this.log = log
     this.diagnosticLogging = diagnosticLogging
+    this.startupTimeoutMs = startupTimeoutMs
     this.child = undefined
     this.stopping = false
   }
@@ -131,15 +149,15 @@ export class HarnessRuntime extends EventEmitter {
       }
       const timeout = setTimeout(() => {
         settle(() => reject(new Error(`DeepSeek Harness did not become ready within ${STARTUP_TIMEOUT_MS / 1000} seconds`)))
-      }, STARTUP_TIMEOUT_MS)
+      }, this.startupTimeoutMs)
 
       const stdout = createLineReader((line) => {
-        if (this.diagnosticLogging) this.log('info', `[dsh] ${line}`)
+        if (this.diagnosticLogging) this.log('info', `[dsh] ${redactRuntimeLine(line)}`)
         const url = parseDshWebUrl(line)
         if (url) settle(() => resolve(url))
       })
       const stderr = createLineReader((line) => {
-        if (this.diagnosticLogging) this.log('error', `[dsh] ${line}`)
+        if (this.diagnosticLogging) this.log('error', `[dsh] ${redactRuntimeLine(line)}`)
       })
       child.stdout.on('data', chunk => stdout.push(chunk))
       child.stderr.on('data', chunk => stderr.push(chunk))
@@ -164,6 +182,23 @@ export class HarnessRuntime extends EventEmitter {
     const child = this.child
     if (!child) return
     this.stopping = true
+    if (child.exitCode !== null || child.signalCode !== null) {
+      if (this.child === child) this.child = undefined
+      return
+    }
+    // Windows SIGTERM terminates only the parent; kill the owned process tree
+    // while its root still exists so tool processes are not orphaned.
+    if (process.platform === 'win32') {
+      const exited = new Promise(resolve => child.once('exit', resolve))
+      try {
+        await promisify(execFile)('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: SHUTDOWN_TIMEOUT_MS })
+      } catch (error) {
+        if (child.exitCode === null && child.signalCode === null) throw error
+      }
+      await exited
+      if (this.child === child) this.child = undefined
+      return
+    }
 
     await new Promise((resolve) => {
       let settled = false

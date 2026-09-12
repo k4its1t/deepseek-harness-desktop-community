@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -11,6 +11,7 @@ import {
   harnessWebArguments,
   HarnessRuntime,
   parseDshWebUrl,
+  redactRuntimeLine,
 } from '../src/harness-runtime.mjs'
 import { resourcesDirectory } from '../scripts/after-pack.mjs'
 import { builderArguments, builderEnvironment } from '../scripts/run-electron-builder.mjs'
@@ -81,36 +82,36 @@ test('line reader handles a URL split across chunks', () => {
 test('resolves the dedicated development runtime', () => {
   assert.equal(
     bundledDshBin({ appPath: '/repo', resourcesPath: '/unused', isPackaged: false }),
-    '/repo/runtime/node_modules/@deepseek-ai/dsh/lib/bin.js',
+    join('/repo', 'runtime/node_modules/@deepseek-ai/dsh/lib/bin.js'),
   )
 })
 
 test('resolves the physical packaged runtime', () => {
   assert.equal(
     bundledDshBin({ appPath: '/unused/app.asar', resourcesPath: '/Applications/DSH.app/Contents/Resources', isPackaged: true }),
-    '/Applications/DSH.app/Contents/Resources/runtime/node_modules/@deepseek-ai/dsh/lib/bin.js',
+    join('/Applications/DSH.app/Contents/Resources', 'runtime/node_modules/@deepseek-ai/dsh/lib/bin.js'),
   )
 })
 
 test('resolves development and packaged companion skills', () => {
   assert.equal(
     bundledSkillsDirectory({ appPath: '/repo', resourcesPath: '/unused', isPackaged: false }),
-    '/repo/.dsh/skills',
+    join('/repo', '.dsh/skills'),
   )
   assert.equal(
     bundledSkillsDirectory({ appPath: '/unused/app.asar', resourcesPath: '/resources', isPackaged: true }),
-    '/resources/skills',
+    join('/resources', 'skills'),
   )
 })
 
 test('resolves the physical desktop Web overlay on macOS and Windows layouts', () => {
   assert.equal(
     bundledWebPatch({ appPath: '/repo', resourcesPath: '/unused', isPackaged: false }),
-    '/repo/desktop/cordis.patch.yml',
+    join('/repo', 'desktop/cordis.patch.yml'),
   )
   assert.equal(
     bundledWebPatch({ appPath: '/unused/app.asar', resourcesPath: '/resources', isPackaged: true }),
-    '/resources/desktop/cordis.patch.yml',
+    join('/resources', 'desktop/cordis.patch.yml'),
   )
 })
 
@@ -124,6 +125,7 @@ test('pins the cross-platform browse picker before starting the Web app', () => 
       'web',
       '--patch',
       '/resources/desktop/cordis.patch.yml',
+      '--no-open',
       '--host',
       '127.0.0.1',
       '--port',
@@ -136,11 +138,11 @@ test('locates packaged resources on macOS and Windows', () => {
   const appInfo = { productFilename: 'DSH Desktop' }
   assert.equal(
     resourcesDirectory({ electronPlatformName: 'darwin', appOutDir: '/out', packager: { appInfo } }),
-    '/out/DSH Desktop.app/Contents/Resources',
+    join('/out', 'DSH Desktop.app/Contents/Resources'),
   )
   assert.equal(
     resourcesDirectory({ electronPlatformName: 'win32', appOutDir: '/out', packager: { appInfo } }),
-    '/out/resources',
+    join('/out', 'resources'),
   )
 })
 
@@ -186,4 +188,51 @@ test('allows only credential-free ad-hoc signing in pull-request builds', () => 
       .CSC_FOR_PULL_REQUEST,
     undefined,
   )
+})
+
+test('authentication survives startup parsing but never reaches diagnostics', () => {
+  const url = 'http://127.0.0.1:49152/?token=private-token#private-fragment'
+  const lines = []
+  const reader = createLineReader(line => lines.push(line))
+  reader.push(Buffer.from(`dsh web: ${url.slice(0, 22)}`))
+  reader.push(Buffer.from(`${url.slice(22)}\n`))
+  assert.equal(parseDshWebUrl(lines[0]), url)
+  assert.doesNotMatch(redactRuntimeLine(lines[0]), /private/)
+  assert.equal(redactRuntimeLine(`request ${url}`), 'request http://127.0.0.1:49152/')
+})
+
+test('timeout can be cleaned up and the same runtime retried without duplicate children', async (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'dsh-timeout-'))
+  const bin = join(directory, 'child.mjs')
+  writeFileSync(bin, 'setInterval(() => {}, 1000)')
+  const runtime = new HarnessRuntime({ executable: process.execPath, dshBin: bin,
+    dshHome: directory, bundledSkills: directory, webPatch: bin, workingDirectory: directory,
+    startupTimeoutMs: 300, log() {} })
+  t.after(async () => { await runtime.stop(); rmSync(directory, { recursive: true, force: true }) })
+  await assert.rejects(runtime.start(), /did not become ready/)
+  await assert.rejects(runtime.start(), /already running/)
+  await runtime.stop()
+  writeFileSync(bin, "console.log('dsh web: http://127.0.0.1:49152/?token=new');setInterval(() => {}, 1000)")
+  runtime.startupTimeoutMs = 5000
+  assert.equal(await runtime.start(), 'http://127.0.0.1:49152/?token=new')
+  await runtime.stop()
+  assert.equal(runtime.child, undefined)
+})
+
+test('Windows shutdown removes the owned child process tree', { skip: process.platform !== 'win32' }, async t => {
+  const directory = mkdtempSync(join(tmpdir(), 'dsh-tree-'))
+  const bin = join(directory, 'child.mjs')
+  const pidFile = join(directory, 'descendant.pid')
+  writeFileSync(bin, `import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs';
+const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { windowsHide: true });
+writeFileSync(${JSON.stringify(pidFile)}, String(child.pid));
+console.log('dsh web: http://127.0.0.1:49152');setInterval(() => {}, 1000);`)
+  const runtime = new HarnessRuntime({ executable: process.execPath, dshBin: bin,
+    dshHome: directory, bundledSkills: directory, webPatch: bin, workingDirectory: directory, log() {} })
+  t.after(async () => { await runtime.stop(); rmSync(directory, { recursive: true, force: true }) })
+  await runtime.start()
+  const pid = Number(readFileSync(pidFile, 'utf8'))
+  process.kill(pid, 0)
+  await runtime.stop()
+  assert.throws(() => process.kill(pid, 0), { code: 'ESRCH' })
 })

@@ -48,6 +48,16 @@ p {
   display: none;
 }
 
+button {
+  margin: 20px 4px 0;
+  padding: 10px 14px;
+  border: 1px solid #a49cff;
+  border-radius: 8px;
+  background: #28245d;
+  color: white;
+  cursor: pointer;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

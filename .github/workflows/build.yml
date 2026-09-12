@@ -3,7 +3,6 @@ name: Build desktop installers
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -47,6 +46,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm test
+      - run: npm run prepare:legacy-test
       - if: runner.os == 'macOS'
         run: npm run ${{ matrix.script }}
         env:
@@ -59,6 +60,7 @@ jobs:
         run: npm run ${{ matrix.script }}
       - if: runner.os == 'macOS'
         run: npm run verify:mac:signature
+      - run: npm run test:package
       - uses: actions/upload-artifact@v6
         with:
           name: deepseek-harness-desktop-${{ matrix.artifact }}

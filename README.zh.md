@@ -17,6 +17,8 @@
 
 这是一个面向 macOS 和 Windows 的非官方、简易、开源 DeepSeek Harness 桌面客户端，复用官方 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI 与 Agent 运行时。
 
+v0.4.0 内置 Harness **0.1.5-rc.1**，增加升级前备份及启动失败恢复。首次升级启动前，请关闭其他使用相同数据的 Harness 实例。详见[升级与恢复指南](docs/UPGRADING.md)。
+
 应用会把固定版本的 `@deepseek-ai/dsh` 作为私有子进程启动，绑定到随机回环端口，再通过沙箱化 Electron 窗口显示官方 Web UI。最终用户不需要另外安装 Node.js 或 `dsh`。
 
 > 本项目是独立社区项目，不是 DeepSeek 官方产品，也未得到 DeepSeek 的背书或隶属关系。
@@ -177,7 +179,7 @@ Windows 便携 ZIP 解压后可直接运行其中的 `DeepSeek Harness Desktop.e
 
 ## 安全设计
 
-Web UI 只监听随机回环端口。Electron Renderer 使用 `contextIsolation`、Chromium sandbox，未启用 Node integration，也没有高权限 preload bridge。更多信息参见 [SECURITY.md](SECURITY.md)。
+Web UI 只监听随机回环端口。Electron Renderer 使用 `contextIsolation`、Chromium sandbox，未启用 Node integration。仅本地恢复页可以调用“重试”和“打开日志”，远程 Web UI 无权调用。更多信息参见 [SECURITY.md](SECURITY.md)。
 
 ## 版本管理
 

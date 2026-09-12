@@ -17,6 +17,8 @@
 
 An unofficial, minimal, open-source desktop shell for the official [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web UI on macOS and Windows.
 
+Version 0.4.0 bundles Harness **0.1.5-rc.1**, backs up existing data before upgrading, and adds startup recovery. Close other Harness instances before the first upgraded launch. See [upgrading and restoring](docs/UPGRADING.md).
+
 The app starts the pinned `@deepseek-ai/dsh` runtime as a private child process, binds it to a random loopback port, and displays the official Web UI in a sandboxed Electron window. End users do not need to install Node.js or `dsh` separately.
 
 > This community project is not an official DeepSeek product and is not affiliated with or endorsed by DeepSeek.
@@ -177,7 +179,7 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the contributor statement. AI-assiste
 
 ## Security
 
-The Web UI is reachable only on a random loopback port. Electron's renderer uses `contextIsolation`, Chromium sandboxing, and no Node.js integration or preload bridge. See [SECURITY.md](SECURITY.md).
+The Web UI is reachable only on a random loopback port. Electron's renderer uses `contextIsolation`, Chromium sandboxing, and no Node.js integration. Only the local recovery page receives narrowly scoped Retry and Open logs actions; the remote Web UI cannot invoke them. See [SECURITY.md](SECURITY.md).
 
 ## Versioning
 
