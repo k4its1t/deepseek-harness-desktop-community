@@ -17,6 +17,7 @@ const root = await mkdtemp(join(tmpdir(), 'desktop-e2e-'))
 const workspace = join(root, '中文 project space')
 await mkdir(workspace)
 let toolResultSeen = false
+let toolResult
 let cancelledConnection = false
 const server = createServer(async (req, res) => {
   let raw = ''
@@ -46,6 +47,7 @@ const server = createServer(async (req, res) => {
       res.end('data: [DONE]\n\n')
       return
     }
+    toolResult = last
     toolResultSeen = JSON.stringify(last).includes('DESKTOP_TOOL_OK')
     send({ role: 'assistant', content: 'DESKTOP_TOOL_DONE' })
   } else send({ role: 'assistant', content: text.includes('MIGRATION_SEED') ? 'MIGRATION_SEED_REPLY' : 'DESKTOP_TEST_REPLY' })
@@ -119,7 +121,7 @@ try {
   await composer.fill('DESKTOP_TOOL_PROMPT')
   await composer.press('Enter')
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
-  assert.equal(toolResultSeen, true, 'the real shell tool must return its output to the model')
+  assert.equal(toolResultSeen, true, `the real shell tool must return its output to the model: ${JSON.stringify(toolResult)}`)
   await composer.fill('DESKTOP_CANCEL_PROMPT')
   await composer.press('Enter')
   await page.getByText('DESKTOP_CANCEL_STREAM', { exact: true }).waitFor({ timeout: 30_000 })
