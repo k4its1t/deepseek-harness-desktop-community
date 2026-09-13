@@ -11,7 +11,22 @@ try {
   if (process.platform === 'win32') {
     installation = await mkdtemp(join(tmpdir(), 'desktop-install-'))
     const installer = resolve('release/DeepSeek-Harness-Desktop-win-x64.exe')
-    await execute(installer, ['/S', `/D=${installation}`], { windowsHide: true, windowsVerbatimArguments: true, timeout: 120_000 })
+    console.log(`Installing Windows package into ${installation}`)
+    const progress = setInterval(() => {
+      readdir(installation).then(files => console.log(`Installation still running; root entries: ${files.join(', ')}`)).catch(error => console.log(`Installation progress: ${error.message}`))
+    }, 30_000)
+    try {
+      // The bundled runtime contains many small files; extraction on CI can
+      // exceed the application startup timeout. Installation has its own bound.
+      await execute(installer, ['/S', `/D=${installation}`], { windowsHide: true, windowsVerbatimArguments: true, timeout: 600_000 })
+    } catch (error) {
+      const diagnostics = await execute('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', 'Get-Process | Where-Object { $_.ProcessName -match "DeepSeek|setup|powershell" } | Select-Object Id,ProcessName,MainWindowTitle | Format-Table -AutoSize'], { windowsHide: true, timeout: 15_000 }).catch(() => null)
+      if (diagnostics) console.error(diagnostics.stdout)
+      throw error
+    } finally {
+      clearInterval(progress)
+    }
+    console.log('Windows installer completed')
     executable = join(installation, 'DeepSeek Harness Desktop.exe')
   } else {
     const folders = await readdir('release')
