@@ -193,7 +193,14 @@ export class HarnessRuntime extends EventEmitter {
       try {
         await promisify(execFile)('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: SHUTDOWN_TIMEOUT_MS })
       } catch (error) {
-        if (child.exitCode === null && child.signalCode === null) throw error
+        // taskkill can report an already-gone process before Node delivers its
+        // exit event. Accept only observed exit, not taskkill errors in general.
+        if (child.exitCode === null && child.signalCode === null) {
+          await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(error), SHUTDOWN_TIMEOUT_MS)
+            exited.then(() => { clearTimeout(timer); resolve() })
+          })
+        }
       }
       await exited
       if (this.child === child) this.child = undefined
