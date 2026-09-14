@@ -110,6 +110,8 @@ try {
   await picker.waitFor({ state: 'hidden' })
   }
   if (migration) {
+    await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+    if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
     await page.getByRole('treeitem').filter({ hasText: /MIGRATION_SEED/ }).first().click()
     await page.getByText('MIGRATION_SEED_REPLY', { exact: true }).last().waitFor({ timeout: 30_000 })
   }
@@ -136,6 +138,8 @@ try {
   app = await automation.launch(launchOptions)
   page = await app.firstWindow()
   await page.waitForURL('http://127.0.0.1:*/**', { timeout: 60_000 })
+  await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+  if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
   await page.getByRole('treeitem').filter({ hasText: migration ? /MIGRATION_SEED/ : /DESKTOP_TEST/ }).first().click({ timeout: 30_000 })
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
   assert.equal(await page.evaluate(() => typeof window.desktopRecovery), 'undefined', 'remote UI must not receive recovery APIs')
@@ -144,6 +148,8 @@ try {
   })
   await page.getByRole('button', { name: 'Retry / 重试', exact: true }).click()
   await page.waitForURL('http://127.0.0.1:*/**', { timeout: 60_000 })
+  await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+  if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
   await page.getByRole('treeitem').filter({ hasText: migration ? /MIGRATION_SEED/ : /DESKTOP_TEST/ }).first().click({ timeout: 30_000 })
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
   console.log('RECOVERY_E2E_OK — local retry restarts the runtime and restores authenticated history')
