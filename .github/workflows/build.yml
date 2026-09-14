@@ -48,6 +48,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run prepare:legacy-test
+      - if: runner.os == 'Windows'
+        run: node scripts/test-windows-shell-console.mjs
       - if: runner.os == 'macOS'
         run: npm run ${{ matrix.script }}
         env:

@@ -16,8 +16,9 @@ if (target === 'win32-x64') {
     const consoleSetup = `
 \t${marker}
 \tconst kernel32 = desktopKoffi.load('kernel32.dll');
+\tconst getConsoleProcessList = kernel32.func('uint32 __stdcall GetConsoleProcessList(void *, uint32)');
 \tconst getConsoleWindow = kernel32.func('void * __stdcall GetConsoleWindow()');
-\tif (!getConsoleWindow()) {
+\tif (getConsoleProcessList(Buffer.alloc(4), 1) === 0) {
 \t\tconst allocConsole = kernel32.func('int __stdcall AllocConsole()');
 \t\tif (!allocConsole()) fail('Unable to create the desktop shell console');
 \t\tconst showWindow = desktopKoffi.load('user32.dll').func('int __stdcall ShowWindow(void *, int)');
