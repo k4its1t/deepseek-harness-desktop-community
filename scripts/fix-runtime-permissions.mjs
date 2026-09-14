@@ -24,7 +24,7 @@ if (target === 'win32-x64') {
 \t\tshowWindow(getConsoleWindow(), 0);
 \t}
 `
-    await writeFile(runner, 'import desktopKoffi from "koffi";\n' + source.replace(anchor, anchor + consoleSetup))
+    await writeFile(runner, 'import desktopKoffi from "koffi";\n' + source.replace(anchor, consoleSetup + anchor))
   }
 }
 
