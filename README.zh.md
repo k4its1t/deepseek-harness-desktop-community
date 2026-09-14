@@ -105,6 +105,8 @@ Skill 默认不读取或输出 API 密钥，也不会在未经用户明确同意
 
 仓库不包含签名证书。无证书的 macOS 构建会获得完整 ad-hoc 完整性签名，但 Gatekeeper 仍无法识别发布者；首次运行可能需要在 Finder 中右键选择“打开”，或前往“系统设置 → 隐私与安全性 → 仍要打开”。Windows 可能显示 SmartScreen 提示。详情参见 [macOS 签名与首次启动说明](docs/MACOS_SIGNING.md)。
 
+Windows 运行时准备阶段会对固定版本的 Harness runner 应用一个小补丁，使 Electron 下的受限 Shell 进程继承隐藏控制台，不改变沙箱权限。参见[上游讨论 #5532](https://github.com/deepseek-ai/deepseek-harness/discussions/5532)；升级到包含上游修复的版本时，应重新审查并移除此补丁。
+
 ## 能力边界与已知限制
 
 - 这是社区桌面包装，不提供 DeepSeek 官方支持、免费 API 配额或托管服务。

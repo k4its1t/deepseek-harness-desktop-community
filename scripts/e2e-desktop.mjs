@@ -17,6 +17,7 @@ const root = await mkdtemp(join(tmpdir(), 'desktop-e2e-'))
 const workspace = join(root, '中文 project space')
 await mkdir(workspace)
 let toolResultSeen = false
+let toolResult
 let cancelledConnection = false
 const server = createServer(async (req, res) => {
   let raw = ''
@@ -46,6 +47,7 @@ const server = createServer(async (req, res) => {
       res.end('data: [DONE]\n\n')
       return
     }
+    toolResult = last
     toolResultSeen = JSON.stringify(last).includes('DESKTOP_TOOL_OK')
     send({ role: 'assistant', content: 'DESKTOP_TOOL_DONE' })
   } else send({ role: 'assistant', content: text.includes('MIGRATION_SEED') ? 'MIGRATION_SEED_REPLY' : 'DESKTOP_TEST_REPLY' })
@@ -108,6 +110,8 @@ try {
   await picker.waitFor({ state: 'hidden' })
   }
   if (migration) {
+    await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+    if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
     await page.getByRole('treeitem').filter({ hasText: /MIGRATION_SEED/ }).first().click()
     await page.getByText('MIGRATION_SEED_REPLY', { exact: true }).last().waitFor({ timeout: 30_000 })
   }
@@ -119,7 +123,7 @@ try {
   await composer.fill('DESKTOP_TOOL_PROMPT')
   await composer.press('Enter')
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
-  assert.equal(toolResultSeen, true, 'the real shell tool must return its output to the model')
+  assert.equal(toolResultSeen, true, `the real shell tool must return its output to the model: ${JSON.stringify(toolResult)}`)
   await composer.fill('DESKTOP_CANCEL_PROMPT')
   await composer.press('Enter')
   await page.getByText('DESKTOP_CANCEL_STREAM', { exact: true }).waitFor({ timeout: 30_000 })
@@ -132,8 +136,12 @@ try {
   assert.equal(page.url(), sessionUrl)
   await app.close()
   app = await automation.launch(launchOptions)
+  app.process().stderr.on('data', chunk => { runtimeOutput += chunk })
   page = await app.firstWindow()
+  page.on('pageerror', error => { runtimeOutput += `${error.stack}\n` })
   await page.waitForURL('http://127.0.0.1:*/**', { timeout: 60_000 })
+  await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+  if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
   await page.getByRole('treeitem').filter({ hasText: migration ? /MIGRATION_SEED/ : /DESKTOP_TEST/ }).first().click({ timeout: 30_000 })
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
   assert.equal(await page.evaluate(() => typeof window.desktopRecovery), 'undefined', 'remote UI must not receive recovery APIs')
@@ -142,6 +150,8 @@ try {
   })
   await page.getByRole('button', { name: 'Retry / 重试', exact: true }).click()
   await page.waitForURL('http://127.0.0.1:*/**', { timeout: 60_000 })
+  await page.getByRole('button', { name: /^(打开|收起)侧边栏$/ }).waitFor()
+  if (await page.getByRole('button', { name: '打开侧边栏', exact: true }).isVisible()) await page.getByRole('button', { name: '打开侧边栏', exact: true }).click()
   await page.getByRole('treeitem').filter({ hasText: migration ? /MIGRATION_SEED/ : /DESKTOP_TEST/ }).first().click({ timeout: 30_000 })
   await page.getByText('DESKTOP_TOOL_DONE', { exact: true }).waitFor({ timeout: 30_000 })
   console.log('RECOVERY_E2E_OK — local retry restarts the runtime and restores authenticated history')
