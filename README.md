@@ -105,6 +105,8 @@ The skills do not read or expose API keys by default and will not send test requ
 
 The repository intentionally contains no signing certificates. Certificate-free macOS builds receive a complete ad-hoc integrity signature, but Gatekeeper still cannot identify the publisher; first launch may require Finder's **Open** command or **System Settings → Privacy & Security → Open Anyway**. Windows may show a SmartScreen warning. See [macOS signing and first-launch guidance](docs/MACOS_SIGNING.md).
 
+Windows runtime preparation applies a small patch to the pinned Harness runner so restricted shell processes inherit a hidden console when hosted by Electron. It does not change sandbox permissions. See [upstream discussion #5532](https://github.com/deepseek-ai/deepseek-harness/discussions/5532); review and remove this patch when upgrading to an upstream fix.
+
 ## Scope and known limitations
 
 - This is a community wrapper; it does not provide official DeepSeek support, free API quota, or a hosted service.
