@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh": "0.1.5-rc.1"
+    "@deepseek-ai/dsh": "0.1.5-rc.2"
   },
   "allowScripts": {
     "@deepseek-ai/dsh-subprocess-local@0.1.5-rc.1": true,
