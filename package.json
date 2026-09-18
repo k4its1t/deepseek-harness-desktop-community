@@ -37,7 +37,7 @@
     "verify:mac:signature": "node scripts/verify-macos-signature.mjs"
   },
   "devDependencies": {
-    "electron": "43.4.0",
+    "electron": "44.3.0",
     "electron-builder": "26.15.3",
     "playwright": "1.63.0"
   },
