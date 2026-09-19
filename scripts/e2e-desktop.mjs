@@ -98,7 +98,9 @@ try {
   app.process().stderr.on('data', chunk => { runtimeOutput += chunk })
   page = await app.firstWindow()
   await page.waitForURL('http://127.0.0.1:*/**', { timeout: 60_000 })
-  await page.waitForFunction(() => Boolean(window.__DSH_BOOT__) && document.body.innerText.length > 100)
+  // A restored workspace with a collapsed sidebar can contain fewer than 100
+  // characters. The controls and session contents below establish UI readiness.
+  await page.waitForFunction(() => Boolean(window.__DSH_BOOT__))
   if (!migration) await page.getByRole('button', { name: '继续', exact: true }).click()
   if (!migration) {
   await page.getByRole('textbox', { name: '选择工作区' }).click()
