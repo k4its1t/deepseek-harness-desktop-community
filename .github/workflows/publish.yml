@@ -1,0 +1,73 @@
+name: Publish verified installers
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Build desktop installers run ID
+        required: true
+        type: string
+      source_sha:
+        description: Exact tested commit SHA (40 characters)
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: publish-installers
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN: ${{ inputs.run_id }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+    steps:
+      - name: Require a successful build of the exact source
+        run: |
+          [[ "$BUILD_RUN" =~ ^[0-9]+$ ]]
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          gh api "repos/$GH_REPO/actions/runs/$BUILD_RUN" > build-run.json
+          jq -e --arg sha "$SOURCE_SHA" --arg repo "$GH_REPO" '.conclusion == "success" and .head_sha == $sha and .path == ".github/workflows/build.yml" and .head_repository.full_name == $repo' build-run.json
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v6
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+          pattern: deepseek-harness-desktop-*
+          path: release
+          merge-multiple: true
+      - name: Assemble verified release assets and notes
+        run: |
+          for name in mac-arm64.dmg mac-arm64.zip mac-x64.dmg mac-x64.zip win-x64.exe win-x64.zip; do
+            test -s "release/DeepSeek-Harness-Desktop-$name"
+          done
+          (cd .dsh/skills && zip -qr ../../release/DeepSeek-Harness-Desktop-Skills.zip .)
+          (cd standalone-skills && zip -qr ../release/DeepSeek-Harness-Desktop-Skills.zip analyze-images-locally)
+          node scripts/checksums.mjs release
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs'
+          const version = JSON.parse(readFileSync('package.json')).version
+          if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Expected stable release version')
+          const base = `https://github.com/${process.env.GH_REPO}`
+          let notes = readFileSync(`docs/releases/v${version}.md`, 'utf8').replace('../UPGRADING.md', `${base}/blob/v${version}/docs/UPGRADING.md`)
+          notes += `\n\nWindows fixes include hidden shell console initialization, shutdown race handling, and equivalent file-URL handling for recovery.\n\nBuild and acceptance: ${base}/actions/runs/${process.env.BUILD_RUN}\n\nDownload the installers and SHA256SUMS below. Historical release pages remain available.\n`
+          writeFileSync('release-notes.md', notes)
+          writeFileSync(process.env.GITHUB_ENV, `RELEASE_TAG=v${version}\n`, { flag: 'a' })
+          NODE
+      - name: Upload as draft, then publish complete release
+        run: |
+          gh release create "$RELEASE_TAG" release/* --target "$SOURCE_SHA" --title "DeepSeek Harness Desktop $RELEASE_TAG" --notes-file release-notes.md --draft
+          gh release view "$RELEASE_TAG" --json assets --jq '.assets | length' | grep -qx 8
+          gh release edit "$RELEASE_TAG" --draft=false --latest
