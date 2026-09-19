@@ -84,12 +84,24 @@ try {
     await composer.fill('MIGRATION_SEED')
     await composer.press('Enter')
     await page.getByText('MIGRATION_SEED_REPLY', { exact: true }).first().waitFor({ timeout: 30_000 })
-    await app.close()
-    app = undefined
-    page = undefined
     const files = await readdir(join(env.DSH_HOME, 'sessions'), { recursive: true })
     legacyId = files.map(file => file.split(/[\\/]/).find(part => part.startsWith('session-'))).find(Boolean)
     assert.ok(legacyId, 'legacy CLI must persist its session')
+    // A visible streamed reply is not a durability barrier. Windows SIGTERM
+    // terminates the old host before its asynchronous write-behind can drain.
+    const deadline = Date.now() + 30_000
+    for (;;) {
+      try {
+        await execute(process.execPath, [resolve('scripts/verify-legacy-restore.mjs'), join(env.DSH_HOME, 'sessions'), legacyId], { env, timeout: 10_000 })
+        break
+      } catch (error) {
+        if (Date.now() >= deadline) throw error
+        await new Promise(resolve => setTimeout(resolve, 250))
+      }
+    }
+    await app.close()
+    app = undefined
+    page = undefined
     const options = { dshHome: env.DSH_HOME, stateDirectory: join(root, 'electron'), runtimeVersion: '0.1.5-rc.1' }
     backup = await backupUpgrade(await inspectUpgrade(options), { backupRoot: join(root, 'backups') })
     console.log('LEGACY_SEED_AND_BACKUP_OK', legacyId)
