@@ -4,6 +4,17 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { loadSettings, normalizeSettings, saveSettings } from '../src/desktop-settings.mjs'
+import { isSameLocalPage } from '../src/local-page.mjs'
+
+test('recovery page accepts equivalent file encodings without trusting other pages', () => {
+  for (const windows of [false, true]) {
+    const expected = 'file:///C:/Users/RUNNER%7E1/中文%20目录/loading.html'
+    assert.equal(isSameLocalPage('file:///C:/Users/RUNNER~1/%E4%B8%AD%E6%96%87%20%E7%9B%AE%E5%BD%95/loading.html?status=error', expected, windows), true)
+    for (const target of [expected.replace('loading.html', 'other.html'), expected.replace('file:', 'https:'), expected.replace('file:///', 'file://untrusted/'), expected.replace('/loading.html', '%2Floading.html'), 'invalid']) {
+      assert.equal(isSameLocalPage(target, expected, windows), false, target)
+    }
+  }
+})
 
 test('desktop preferences survive relaunch without storing unrelated fields', (t) => {
   const directory = mkdtempSync(join(tmpdir(), 'dsh-settings-'))

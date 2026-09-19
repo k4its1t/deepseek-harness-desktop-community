@@ -1,6 +1,7 @@
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { isSameLocalPage } from './local-page.mjs'
 import { app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, screen, session, shell } from 'electron'
 import { inspectUpgrade, backupUpgrade, recordFreshInstall } from './upgrade-backup.mjs'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './desktop-settings.mjs'
@@ -52,7 +53,7 @@ function log(level, message) {
 function isAllowedNavigation(target) {
   try {
     const url = new URL(target)
-    if (url.protocol === 'file:') return url.pathname === loadingPageUrl.pathname
+    if (url.protocol === 'file:') return isSameLocalPage(url, loadingPageUrl)
     return allowedOrigin !== undefined && url.origin === allowedOrigin
   } catch {
     return false
@@ -299,7 +300,7 @@ async function boot() {
   const requireRecoveryPage = (event) => {
     if (event.sender !== mainWindow?.webContents || event.senderFrame !== event.sender.mainFrame) throw new Error('Invalid recovery caller')
     const url = new URL(event.senderFrame.url)
-    if (url.protocol !== 'file:' || url.pathname !== loadingPageUrl.pathname) throw new Error('Recovery is only available on the local loading page')
+    if (!isSameLocalPage(url, loadingPageUrl)) throw new Error('Recovery is only available on the local loading page')
   }
   ipcMain.handle('desktop:retry', async (event) => { requireRecoveryPage(event); await startRuntime() })
   ipcMain.handle('desktop:open-logs', async (event) => { requireRecoveryPage(event); await shell.openPath(app.getPath('logs')) })
