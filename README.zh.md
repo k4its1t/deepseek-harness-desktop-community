@@ -1,5 +1,9 @@
 # DeepSeek Harness Desktop
 
+> **停止维护公告 — 2026 年 9 月 25 日。** DeepSeek 已提供官方 Harness 桌面端，本独立社区客户端即日起停止维护，不再提供新功能、问题修复、安全更新或新版本。请转向[官方桌面端文档](https://github.com/deepseek-ai/deepseek-harness/tree/master/apps/desktop)、[DeepSeek 官方 Harness 仓库](https://github.com/deepseek-ai/deepseek-harness)及[官方 Harness 网站](https://deepseek.com/harness/)。
+>
+> 源码、历史安装包与更新日志继续保留，供历史查阅及按 MIT 许可自行 Fork，不代表仍受支持。切换前请备份配置与会话，关闭共用数据目录的其他实例，并遵循官方客户端说明；本社区版到官方版的自动迁移尚未验证。感谢大家的测试与贡献，也保留本项目通过 Vibe Coding 开发及 Codex 参与贡献的记录。
+
 <p align="center">
   <img src="build/icon.png" width="128" alt="DeepSeek Harness Desktop 大肥鱼图标">
 </p>
@@ -34,7 +38,9 @@ DeepSeek Harness 本身已经提供完整的 Web UI 和 Agent 运行时，但命
 - 已经使用 CLI，希望继续复用 `~/.dsh` 数据的用户；
 - 愿意测试社区构建并反馈不同硬件兼容性的开发者。
 
-## 直接下载
+## 历史社区版本下载（已停止维护）
+
+以下为最后的社区构建，并非官方桌面端；请优先使用上方官方入口。
 
 | 平台 | 下载 |
 | --- | --- |

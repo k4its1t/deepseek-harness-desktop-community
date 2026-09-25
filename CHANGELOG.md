@@ -1,5 +1,11 @@
 # 更新日志 / Changelog
 
+## 2026-09-25 — 停止维护 / Maintenance ended
+
+- DeepSeek 已提供[官方 Harness 桌面端](https://github.com/deepseek-ai/deepseek-harness/tree/master/apps/desktop)，本社区项目停止功能、问题修复、安全更新与新版本发布。
+- 请使用[官方仓库](https://github.com/deepseek-ai/deepseek-harness)；历史源码、发布页及更新日志保留，仍可按 MIT 许可自行 Fork。
+- This community client is no longer maintained. Prefer the official desktop application; existing releases remain available as unsupported historical artifacts.
+
 这里记录 DeepSeek Harness Desktop 的最新发布内容。项目采用 **Vibe Coding** 方式开发，维护者负责目标、素材选择与发布决策，**Codex (OpenAI)** 作为开发贡献者参与实现、测试、打包和文档整理。
 
 ## v0.4.0 — 2026-09-12

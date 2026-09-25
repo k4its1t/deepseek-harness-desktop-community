@@ -2,11 +2,11 @@
 
 ## Supported versions
 
-Only the latest release is supported with security fixes.
+None. Maintenance ended on September 25, 2026, including security updates for v0.4.0 and all earlier releases. Use the [official DeepSeek Harness desktop](https://github.com/deepseek-ai/deepseek-harness/tree/master/apps/desktop) instead. Historical binaries are unsupported.
 
 ## Reporting a vulnerability
 
-Please do not open a public issue for a suspected vulnerability. Use GitHub's private vulnerability reporting feature in the repository's **Security** tab. Include the affected version, operating system, reproduction steps, and expected impact.
+Do not post credentials or sensitive logs publicly. This community project no longer promises vulnerability triage or fixes. If a vulnerability also affects the official application, follow the upstream security policy; do not send community-wrapper-only issues to upstream as official product bugs.
 
 ## Security design
 

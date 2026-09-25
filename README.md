@@ -1,5 +1,9 @@
 # DeepSeek Harness Desktop
 
+> **Maintenance ended — September 25, 2026.** DeepSeek now provides its own Harness desktop application. This independent community client will receive no further features, bug fixes, security updates, or releases. Please use the [official desktop documentation](https://github.com/deepseek-ai/deepseek-harness/tree/master/apps/desktop) and [official DeepSeek Harness repository](https://github.com/deepseek-ai/deepseek-harness). See also the [official Harness website](https://deepseek.com/harness/).
+>
+> Source code, past releases, and changelogs remain available for historical reference and MIT-licensed forks, not as supported downloads. Back up your configuration and sessions before switching, close other instances sharing the data directory, and follow the official application's instructions; automatic migration from this client has not been verified. Thank you to everyone who tested and contributed, including Codex through Vibe Coding.
+
 <p align="center">
   <img src="build/icon.png" width="128" alt="DeepSeek Harness Desktop whale icon">
 </p>
@@ -34,7 +38,9 @@ It is intended for:
 - existing CLI users who want to reuse their `~/.dsh` data;
 - developers willing to test community builds on different hardware.
 
-## Direct downloads
+## Historical community downloads — unsupported
+
+These are the final community builds, not the official desktop application. Prefer the official links above.
 
 | Platform | Download |
 | --- | --- |

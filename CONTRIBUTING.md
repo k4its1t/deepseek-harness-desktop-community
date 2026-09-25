@@ -1,6 +1,8 @@
 # Contributing
 
-Contributions are welcome: code, documentation, reproducible bug reports, platform compatibility results, and companion Skill improvements all help.
+Maintenance ended on September 25, 2026. New issues and pull requests are not actively triaged or merged. Please use the [official DeepSeek Harness desktop](https://github.com/deepseek-ai/deepseek-harness/tree/master/apps/desktop). Report only issues reproduced in the official application to upstream; upstream does not support this community wrapper. MIT-licensed forks remain welcome.
+
+The development instructions below are retained for historical reference and independent forks.
 
 ## Before starting
 
